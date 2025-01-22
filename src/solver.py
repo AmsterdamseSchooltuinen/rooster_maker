@@ -15,9 +15,18 @@ def solve_schedule_problem(garden: Garden):
     # Initialize the model
     model = cp_model.CpModel()
 
-    group_time_teacher_availability = make_group_teacher_time_slots_dict(garden, model)
-    add_constraints(garden)
-    add_objective_function(garden, model, group_time_teacher_availability)
+    availability = make_group_teacher_time_slots_dict(garden, model)
+    model = add_constraints(
+        garden,
+        model,
+        availability,
+    )
+
+    add_objective_function(
+        garden,
+        model,
+        availability,
+    )
 
     # Solve the model
     solver = cp_model.CpSolver()

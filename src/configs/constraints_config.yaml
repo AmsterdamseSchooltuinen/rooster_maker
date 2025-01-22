@@ -1,18 +1,59 @@
 #Group constaints
-each_group_max_once_per_week:
-  included: true
-
 only_schedule_groups_when_they_are_available:
   included: true
-  constraint_type:
-  logic:
+  hard_constraint: true
+
+each_group_max_once_per_week:
+  included: true
+  hard_constraint: true
+
 
 #Garden Plot constraints
+max_number_of_groups_per_time_slot:
+  included: true
+  hard_constraint: true
+
 no_more_students_than_plots:
-  included: false
+  included: true
+  hard_constraint: true
 
+#Educator constraints
+only_schedule_teachers_when_they_are_available:
+  included: true
+  hard_constraint: true
 
-
-#Educator contraints
 each_educator_max_once_per_time_slot:
   included: true
+  hard_constraint: true
+
+educator_gets_one_slot_of_for_variable_availability:
+  included: true
+  hard_constraint: true
+
+
+
+#Not yet implemented
+max_buses_per_time_slot:
+  included: false
+  hard_constraint: true
+
+educator_needs_one_maintenance_slots:
+  included: false
+  hard_constraint: true
+
+bus_groups_of_same_school_go_together:
+  included: false
+  hard_constraint: true
+
+
+bus_groups_come_not_in_the_morning:
+  included: false
+  hard_constraint: false
+
+bus_groups_come_after_each_other:
+  included: false
+  hard_constraint: false
+
+assign_educators_evenly:
+  included: false
+  hard_constraint: false
