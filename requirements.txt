@@ -109,3 +109,5 @@ six==1.17.0 ; python_version >= "3.10" and python_version < "4.0" \
 tzdata==2025.1 ; python_version >= "3.10" and python_version < "4.0" \
     --hash=sha256:24894909e88cdb28bd1636c6887801df64cb485bd593f2fd83ef29075a81d694 \
     --hash=sha256:7e127113816800496f027041c570f50bcd464a020098a3b6b199517772303639
+ortools==9.11.4210 ; python_version >= "3.10" and python_version < "4.0" \
+    --hash=sha256:d9b858f0273e19f81555428d54d407428d0a70a8cb5df2c320935bb735f2c6bb
