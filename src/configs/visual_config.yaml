@@ -4,44 +4,44 @@ test:
 etl:
   school:
     col_mapping:
-      "code": code
-      "periodeid": period_id
-      "schoolcode": school_code
-      "naam": name
-      "lopenofbus": transport_type
-      "telefoon": phone
-      "tuinlocatie": garden_name
-      "groepniveauvan": group_level
-      "groep": group
-      "leerlingen": students
-      "voorkeursperiode": preferred_period
-      "opmerkingen": comments
-      "SO boeken / Engels": special_education_books
-      "vrijveld1": num_groups_from_school
-      "vrijveld2": preference_1
-      "vrijveld3": preference_2
-      "vrijveld4": preference_3
-      "vrijveld5": preference_4
-      "vrijveld6": preference_5
-      "locatie": location
+      - "code": code
+      - "periodeid": period_id
+      - "schoolcode": school_code
+      - "naam": name
+      - "lopenofbus": transport_type
+      - "telefoon": phone
+      - "tuinlocatie": garden_name
+      - "groepniveauvan": group_level
+      - "groep": group
+      - "leerlingen": students
+      - "voorkeursperiode": preferred_period
+      - "opmerkingen": comments
+      - "SO boeken / Engels": special_education_books
+      - "vrijveld1": num_groups_from_school
+      - "vrijveld2": preference_1
+      - "vrijveld3": preference_2
+      - "vrijveld4": preference_3
+      - "vrijveld5": preference_4
+      - "vrijveld6": preference_5
+      - "locatie": location
     col_names_to_check_duplicates:
       - schoolcode
       - naam
       - groep
     col_names_timeslots:
-      - vrijveld 2
-      - vrijveld 3
-      - vrijveld 4
-      - vrijveld 5
-      - vrijveld 6
+      - preference_1
+      - preference_2
+      - preference_3
+      - preference_4
+      - preference_5
   educator:
     col_mapping:
       - "Tuinlocatie": "garden_name"
       - "Medewerker": "medewerker"
   garden:
     col_mapping:
-      "Tuinlocatie": garden_name
-      "Aantal beschikbare tuintjes": available_plots
-      "Maximaal aantal groepen per tijdslot": max_groups_per_timeslot
-      "Maximaal aantal bussen per tijdslot": max_buses_per_timeslot
-      "Aantal reserve tuintjes": reserve_plots
+      - "Tuinlocatie": garden_name
+      - "Aantal beschikbare tuintjes": available_plots
+      - "Maximaal aantal groepen per tijdslot": max_groups_per_timeslot
+      - "Maximaal aantal bussen per tijdslot": max_buses_per_timeslot
+      - "Aantal reserve tuintjes": reserve_plots
