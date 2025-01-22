@@ -1,0 +1,18 @@
+#Group constaints
+each_group_max_once_per_week:
+  included: true
+
+only_schedule_groups_when_they_are_available:
+  included: true
+  constraint_type:
+  logic:
+
+#Garden Plot constraints
+no_more_students_than_plots:
+  included: false
+
+
+
+#Educator contraints
+each_educator_max_once_per_time_slot:
+  included: true
