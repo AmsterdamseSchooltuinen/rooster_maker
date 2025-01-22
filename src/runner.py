@@ -25,17 +25,26 @@ def run_program(school_data: pd.DataFrame, garden_data: pd.DataFrame, educator_d
         current_garden_data = garden_data.loc[garden_data['garden_name'] == garden_name]
 
         # TODO: extract the teacher availability based on the value of each column
-        # TODO: determine the format of the availabiliy of schools, teachers, groups and timeslots
+        # TODO: determine the format of the availability of groups, teachers and timeslots
 
         current_garden = Garden(name=garden_name,
                                 available_plots=current_garden_data['available_plots'],
                                 number_of_classrooms=current_garden_data['max_groups_per_timeslot'],
                                 number_of_max_buses=current_garden_data['max_buses_per_timeslot'],
-                                groups=dict(zip(current_school_data['period_id'], current_school_data['??'])),
+                                group_availability=dict(zip(current_school_data['group_id'],
+                                                            [current_school_data['preference_1'],
+                                                             current_school_data['preference_2'],
+                                                             current_school_data['preference_3'],
+                                                             current_school_data['preference_4'],
+                                                             current_school_data['preference_5']])),
                                 time_slots=[1],
                                 teachers=list(current_educator_data['educator'].unique()),
-                                teacher_availability={1:1},
-                                school_availability={1:1})
+                                teacher_availability=dict(zip(current_educator_data['educator'],
+                                                              [current_educator_data['preference_1'],
+                                                               current_educator_data['preference_2'],
+                                                               current_educator_data['preference_3'],
+                                                               current_educator_data['preference_4'],
+                                                               current_educator_data['preference_5']])))
 
         # Solve the schedule problem
         solver_result = solve_schedule_problem(current_garden)
