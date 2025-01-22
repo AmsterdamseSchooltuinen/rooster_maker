@@ -12,23 +12,11 @@ class Garden:
     available_plots: int
     number_of_classrooms: int
     number_of_max_buses: int
+    groups: list
+    time_slots: list
+    teachers: list
     teacher_availability: dict
     school_availability: dict
-    model: cp_model.CpModel = cp_model.CpModel()
-
-    def make_group_teacher_time_slots_dict(self):
-        """Create a dictionary for all possible combinations of group, teacher and time slot."""
-        group_time_teacher_availability = {}
-        groups = ["school_1", "school_2", "school_3"]
-        time_slots = ["mon_1", "mon_2", "mon_3"]
-        teachers = ["Floris", "Thomas", "Nils"]
-
-        for group in groups:
-            for time_slot in time_slots:
-                for teacher in teachers:
-                    group_time_teacher_availability[(group, time_slot, teacher)] = (
-                        self.model.NewBoolVar(f"{group}_{time_slot}_{teacher}")
-                    )
 
     def _set_constraints(self, front_end_constraints: Optional[dict]) -> None:
         """Set the constraints for the garden."""
