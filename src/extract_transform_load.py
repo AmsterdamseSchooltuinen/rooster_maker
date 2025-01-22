@@ -1,7 +1,9 @@
 import pandas as pd
 import re
 import os
-from configs.get_config import get_config
+from src.configs.get_config import get_config
+import src.data_validations as dv
+from src.data_validations import ValidationException
 
 config = get_config("visual_config")
 
@@ -135,9 +137,20 @@ def transform_educator_file(educator_df):
 def transform_garden_file(garden_df):    
     return garden_df
 
-class ValidationException(Exception):
-    def __init__(self, message, input_name):
-        super().__init__(message)
-        self.input_name = input_name
-        
-run_extract_transform_load()
+
+def execute_validations(config, data):
+    exceptions = []
+    for validation_name, validation_args in config['validations'].items():
+        validation_func = getattr(dv, validation_name)
+        args = [data[arg_value] if 'df' in arg_key else arg_value for arg_key, arg_value in validation_args.items()]
+        print("yay")
+        failure, message = validation_func(*args)
+        if failure:
+            table_names = [arg_value for arg_key, arg_value in validation_args.items() if 'df' in arg_key]
+            exceptions.append(ValidationException(message, table_names))
+    if exceptions:
+        for e in exceptions:
+            print(f"Validation failed for {e.input_name}: {e}")
+        raise Exception("Validations failed")
+
+    

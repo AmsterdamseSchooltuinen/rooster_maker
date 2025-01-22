@@ -40,8 +40,21 @@ etl:
       - "Medewerker": "medewerker"
   garden:
     col_mapping:
-      - "Tuinlocatie": garden_name
-      - "Aantal beschikbare tuintjes": available_plots
-      - "Maximaal aantal groepen per tijdslot": max_groups_per_timeslot
-      - "Maximaal aantal bussen per tijdslot": max_buses_per_timeslot
-      - "Aantal reserve tuintjes": reserve_plots
+      - "Tuinlocatie": "garden_name"
+      - "Aantal beschikbare tuintjes": "available_plots"
+      - "Maximaal aantal groepen per tijdslot": "max_groups_per_timeslot"
+      - "Maximaal aantal bussen per tijdslot": "max_buses_per_timeslot"
+      - "Aantal reserve tuintjes": "reserve_plots"
+validations:
+  check_duplicates:
+    df: school_df
+    col_names_to_check_duplicates: 
+      - "schoolcode"
+      - "naam"
+      - "groep"
+    sort_by_col: "periodeid"
+  confirm_key_exists_and_is_identical:
+    key_col: tuinlocatie
+    df_1: garden_df
+    df_2: school_df
+    
