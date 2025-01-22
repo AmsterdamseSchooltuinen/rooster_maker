@@ -4,11 +4,13 @@ version = "0.1.0"
 description = ""
 authors = ["nils <nils@acmetric.org>"]
 readme = "README.md"
-package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.10"
 pandas = "^2.2.3"
+ipykernel = "^6.29.5"
+pyyaml = "^6.0.2"
+ortools = "^9.11.4210"
 
 
 [build-system]
