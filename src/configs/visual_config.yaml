@@ -37,11 +37,11 @@ etl:
   educator:
     col_mapping:
       - "Tuinlocatie": "garden_name"
-      - "Medewerker": "medewerker"
+      - "Medewerker": "educator"
   garden:
     col_mapping:
       "Tuinlocatie": garden_name
       "Aantal beschikbare tuintjes": available_plots
       "Maximaal aantal groepen per tijdslot": max_groups_per_timeslot
       "Maximaal aantal bussen per tijdslot": max_buses_per_timeslot
-      "Aantal reserve tuintjes": reserve_plots
+      "Aantal reserve tuintjes": reserved_plots
