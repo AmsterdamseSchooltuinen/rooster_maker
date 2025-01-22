@@ -1,9 +1,10 @@
 import pandas as pd
 import os
 from src.configs.get_config import get_config
-from src.data_validations import find_and_remove_duplicates
+import src.data_validations as dv
+from src.data_validations import ValidationException
 
-config = get_config("etl_config")
+config = get_config("visual_config")
 
 current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 file_path_educator_data = os.path.join(current_dir, 'data', 'EDUCATORS 2025.xlsx')
@@ -81,4 +82,21 @@ def validate_garden_file(garden_data: pd.DataFrame, timeslots):
     
     return
 
-run_extract_transform_load(config)
+# run_extract_transform_load(config)
+
+def execute_validations(config, data):
+    exceptions = []
+    for validation_name, validation_args in config['validations'].items():
+        validation_func = getattr(dv, validation_name)
+        args = [data[arg_value] if 'df' in arg_key else arg_value for arg_key, arg_value in validation_args.items()]
+        print("yay")
+        failure, message = validation_func(*args)
+        if failure:
+            table_names = [arg_value for arg_key, arg_value in validation_args.items() if 'df' in arg_key]
+            exceptions.append(ValidationException(message, table_names))
+    if exceptions:
+        for e in exceptions:
+            print(f"Validation failed for {e.input_name}: {e}")
+        raise Exception("Validations failed")
+
+    
