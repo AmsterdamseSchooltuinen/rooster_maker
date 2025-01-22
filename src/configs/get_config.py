@@ -11,8 +11,9 @@ def get_config(config_name: str) -> dict:
     Returns:
         dict: dictionary of the solver config vars
     """
-    if config_name not in ["solver_config", "visual_config"]:
-        raise Exception(f"Invalid config name: {config_name}")
+    if config_name not in ["solver_config", "visual_config", "constraints_config"]:
+        print(f"Invalid config name: {config_name}")
+        # raise Exception(f"Invalid config name: {config_name}")
     file_path = Path(__file__).parent / f"{config_name}.yaml"
     return _open_yaml_file(file_path)
 
