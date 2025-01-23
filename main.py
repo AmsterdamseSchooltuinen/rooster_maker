@@ -6,6 +6,7 @@ from io import BytesIO
 from src.configs.get_config import get_config
 from src.extract_transform_load import run_extract_transform_load
 from src.data_validations import ValidationExceptionCollector
+from src.runner import run_program
 
 
 def main_test():
@@ -43,10 +44,14 @@ def main():
     if run or run_override:
         st.session_state.run_clicked = True        
         try:
-            run_extract_transform_load(educators_bytes, garden_bytes, school_bytes)
+            educator_data, garden_data, school_data, timeslots = run_extract_transform_load(educators_bytes, garden_bytes, school_bytes)
             
-            # RUN EVERYTHING HERE 
-            
+            # RUN EVERYTHING HERE
+            # TODO: update the output function because it doesn't work at the moment
+            summary_statistics_dict, final_output_df = run_program(school_data=school_data,
+                                                                   educator_data=educator_data,
+                                                                   garden_data=garden_data,
+                                                                   time_slots=timeslots)
             final_output_df = pd.DataFrame(['test',2,3])
             summary_statistics_dict = {'Kalff Schooltuin': {
                 'available_plots': 200,

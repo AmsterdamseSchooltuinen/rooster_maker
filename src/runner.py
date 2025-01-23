@@ -24,7 +24,6 @@ def run_program(
     all_summary_stats = {}
     output = None
     for garden_name in unique_gardens[:1]:
-        print(garden_name)
         # Subset the data to only include data relevant to the current garden
         current_school_data = school_data.loc[school_data["garden_name"] == garden_name]
         current_educator_data = educator_data.loc[
@@ -125,20 +124,4 @@ def get_summary_statistics(
                     )
                     assigned_students += garden.group_sizes[group]
 
-    # Some log information
-
-    unasigned_groups = set(garden.groups) - set(assigned_groups)
-    display(schedule)
-    print("Unassigned groups:", unasigned_groups)
-    print(f"max_groups_per_time_slot: {garden.max_groups_per_time_slot}")
-    print(f"max_buses_per_time_slot: {garden.max_buses_per_time_slot}")
-    print(f"available_plots: {garden.available_plots}")
-    print(f"assigned_students: {assigned_students}")
-
-    summary["available_plots"] = garden.available_plots
-    summary["reserved_plots"] = garden.reserved_plots
-    summary["total_groups"] = len(garden.group_sizes)
-    summary["assigned_groups"] = len(set(assigned_groups))
-    summary["unassigned_groups"] = len(unasigned_groups)
-    print(summary)
     return summary
