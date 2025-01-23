@@ -1,9 +1,25 @@
 labels:
-  title_label: "Goede morgen!"
-  educators_label: "Leraren Beschikbaarheid Data"
-  school_label: Groep Beschikbaarheid Data"
-  garden_label: "Schooltuinen Data"
-  run_label: "Run!!!"
+  title_label: "Schooltuinen Amsterdam Roosterplanner"
+  # subheader_label: "*** Uitleg voor gebruik ***"
+  subheader_label: |
+      Amsterdamse Schooltuinen X Amsterdam Data Collective - Collective Week 2025
+      Gebruiksinstructie programma:  
+
+      **Stap 1.** Upload drie bestanden:  
+        - **A. Beschikbaarheid medewerkers:** De beschikbaarheid van alle medewerkers op alle mogelijke uren voor specifieke tuinen. Een 'N' betekent dat de leraar niet beschikbaar is, een 'B' betekent dat de leraar beschikbaar is.  
+        - **B. Beschikbaarheid groepen:** De beschikbaarheid van alle groepen voor specifieke tuinen. De data komt uit de ingevulde forms met daarin de voorkeuren voor tijden en dagen.
+        - **C. Schooltuinen informatie:** In dit bestand is alle informatie over de beschikbare tuinen te vinden. Bijvoorbeeld het maximale aantal groepen, bussen en reservetuintjes. 
+
+      **Stap 2.** Klik op '_Draai Programma_' en wacht tot de '_Klaar met optimalisatie_' tekst en de resultaten verschijnen. De resultaten laten informatie over de optimilisatie zien, zoals bijvoorbeeld hoeveel groepen niet zijn ingedeeld per tuin.
+
+      **Stap 3.** Download geoptimaliseerd rooster door op '_Download Resultaten_' te klikken.
+
+      
+  educators_label: "Beschikbaarheid medewerkers"
+  school_label: "Beschikbaarheid groepen"
+  garden_label: "Schooltuinen informatie"
+  run_label: "Draai programma"
+  finished_run_label: "Klaar met optimalisatie!"
 test:
   test_sub: 1
   test_sub_2: hello
