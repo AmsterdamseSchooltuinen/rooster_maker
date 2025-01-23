@@ -86,7 +86,7 @@ for slot in time_slots:
         <= max_groups_per_slot
     )
 
-# A group can only be assigned to a slot if it's in their availability
+# A group can only be assigned t o a slot if it's in their availability
 for group, availability in availability_groups.items():
     for slot in time_slots:
         if slot not in availability:
