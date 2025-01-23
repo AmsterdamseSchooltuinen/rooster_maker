@@ -5,7 +5,7 @@ import pandas as pd
 
 import src.data_validations as dv
 from src.configs.get_config import get_config
-from src.data_validations import ValidationException
+from src.data_validations import ValidationException, ValidationExceptionCollector
 
 config = get_config("input_data_config")
 
@@ -27,16 +27,12 @@ def run_extract_transform_load(
     if not school_data:
         school_data = file_path_school_data
 
-    educator_df, garden_df, school_df = load_data(
-        educator_data, garden_data, school_data
-    )
+
+    educator_df, garden_df, school_df = load_data(educator_data, garden_data, school_data)
 
     data, timeslots = run_transformation(educator_df, garden_df, school_df)
 
-    # try:
-    #     execute_validations(config["validations"], data)
-    # except Exception as e:
-    #     print(f"An error occurred: {e}")
+    execute_validations(config["validations"], data)
 
     return data["educator_df"], data["garden_df"], data["school_df"], timeslots
 
@@ -96,8 +92,9 @@ def clean_primary_keys(df: pd.DataFrame, primary_keys: list[str]) -> pd.DataFram
     """
     Clean the primary keys in a dataframe.
     """
+
     for key in primary_keys:
-        df = df[pd.notna(df[key])]
+        df = df.dropna(subset=[key])
     return df
 
 
@@ -190,23 +187,17 @@ def transform_garden_file(garden_df):
     return garden_df
 
 
-def execute_validations(validation_config, data):
+def execute_validations(validation_config: list[dict], data: dict):
     exceptions = []
-    for validation_name, validation_args in validation_config.items():
-        validation_func = getattr(dv, validation_name)
-        args = [
-            data[arg_value] if "df" in arg_key else arg_value
-            for arg_key, arg_value in validation_args.items()
-        ]
-        failure, message = validation_func(*args)
-        if failure:
-            table_names = [
-                arg_value
-                for arg_key, arg_value in validation_args.items()
-                if "df" in arg_key
-            ]
-            exceptions.append(ValidationException(message, table_names))
+    for validation in validation_config:
+        for validation_name, validation_args in validation.items():
+            validation_func = getattr(dv, validation_name)
+            args = [data[arg_value] if 'df' in arg_key else arg_value for arg_key, arg_value in validation_args.items()]
+            table: str = [arg_value for arg_key, arg_value in validation_args.items() if 'df' in arg_key][0]
+            args += [table]
+            failure, message = validation_func(*args)
+            if failure:
+                table_names = [arg_value for arg_key, arg_value in validation_args.items() if 'df' in arg_key]
+                exceptions.append(ValidationException(message, table_names))
     if exceptions:
-        for e in exceptions:
-            print(f"Validation failed for {e.input_name}: {e}")
-        raise Exception("Validations failed")
+        raise ValidationExceptionCollector(exceptions)
