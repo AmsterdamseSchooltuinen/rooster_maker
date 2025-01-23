@@ -89,56 +89,50 @@ def run_program(
         )
 
         # Solve the schedule problem
-        solver_result, assignment = solve_schedule_problem(current_garden)
+        solver_result, assignment, solved = solve_schedule_problem(current_garden)
 
         # Get the summary statistics and output
-        summary_stats = get_summary_statistics(
-            solver_result, current_garden, assignment
-        )
+        summary_stats = get_summary_statistics(solver_result,
+                                               current_garden,
+                                               assignment,
+                                               solved)
         all_summary_stats[garden_name] = summary_stats
         output = format_output(solver_result, current_garden)
     return all_summary_stats, output
 
 
 def format_output(solved_info: cp_model.CpSolver, garden: Garden):
-    # TODO: fill this function? Or import it from wherever it is now.
+    # TODO: fill this function with Thomas' code! It returns the information per garden.
+    # Call the excel formatting function!
     return 1
 
 
-def get_summary_statistics(
-    solved_info: cp_model.CpSolver, garden: Garden, assignment: dict
-):
-    # Create the summary_statistics dictionary for the given garden
-    summary = {}
-    assigned_groups = []
-    assigned_students = 0  # TODO!
-    schedule = pd.DataFrame(index=garden.teachers, columns=garden.time_slots)
-    schedule = schedule.fillna("")
+def get_summary_statistics(solved_info: cp_model.CpSolver,
+                           garden: Garden,
+                           assignment: dict,
+                           solved: bool):
 
-    for group in garden.groups:
-        for time in garden.time_slots:
-            for teacher in garden.teachers:
-                if solved_info.Value(assignment[(group, time, teacher)]) == 1:
-                    assigned_groups.append(group)
-                    schedule.at[teacher, time] = (
-                        f"{group} ({garden.group_sizes[group]})"
-                    )
-                    assigned_students += garden.group_sizes[group]
+    # If the garden has a feasible solution, create the summary_statistics dictionary
+    if solved:
+        summary = {}
+        assigned_groups = []
+        assigned_students = 0
+        schedule = pd.DataFrame(index=garden.teachers, columns=garden.time_slots)
+        schedule = schedule.fillna("")
 
-    # Some log information
+        for group in garden.groups:
+            for time in garden.time_slots:
+                for teacher in garden.teachers:
+                    if solved_info.Value(assignment[(group, time, teacher)]) == 1:
+                        assigned_groups.append(group)
+                        schedule.at[teacher, time] = (
+                            f"{group} ({garden.group_sizes[group]})"
+                        )
+                        assigned_students += garden.group_sizes[group]
 
-    unasigned_groups = set(garden.groups) - set(assigned_groups)
-    display(schedule)
-    print("Unassigned groups:", unasigned_groups)
-    print(f"max_groups_per_time_slot: {garden.max_groups_per_time_slot}")
-    print(f"max_buses_per_time_slot: {garden.max_buses_per_time_slot}")
-    print(f"available_plots: {garden.available_plots}")
-    print(f"assigned_students: {assigned_students}")
+    # If there was no feasible solution found, store information about that
+    else:
+        summary = ("The scheduling problem could not be solved for this garden with the current "
+                   "input data and the current constraints. Please review the data and constraints and run again.")
 
-    summary["available_plots"] = garden.available_plots
-    summary["reserved_plots"] = garden.reserved_plots
-    summary["total_groups"] = len(garden.group_sizes)
-    summary["assigned_groups"] = len(set(assigned_groups))
-    summary["unassigned_groups"] = len(unasigned_groups)
-    print(summary)
     return summary
