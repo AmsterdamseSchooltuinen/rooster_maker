@@ -1,8 +1,10 @@
-import pandas as pd
-import re
 import os
-from src.configs.get_config import get_config
+import re
+
+import pandas as pd
+
 import src.data_validations as dv
+from src.configs.get_config import get_config
 from src.data_validations import ValidationException
 
 config = get_config("visual_config")
@@ -13,30 +15,21 @@ file_path_educator_data = os.path.join(current_dir, 'data', 'EDUCATORS 2025.xlsx
 file_path_garden_data = os.path.join(current_dir, 'data', 'SCHOOL GARDENS 2025.xlsx')
 file_path_school_data = os.path.join(current_dir, 'data', 'SCHOOLS 2025.xlsx')
     
-def run_extract_transform_load():
-    path_educator_data = file_path_educator_data # change to config 
-    path_garden_data = file_path_garden_data # change to config
-    path_school_data = file_path_school_data # change to config
-    
-    educator_df, garden_df,school_df = load_data(path_educator_data, path_garden_data, path_school_data)
+def run_extract_transform_load(educator_data: bytes, garden_data: bytes, school_data: bytes):
 
-    educator_df, garden_df, school_df, timeslots = run_transformation(educator_df, garden_df, school_df)
-    # run_validation(educator_df, garden_df, school_df)
-    return 
-    
-def load_data(path_educator_data, path_garden_data, path_school_data):
-    # Check if each file exists
-    if not os.path.isfile(path_educator_data):
-        raise FileNotFoundError(f"File not found: {path_educator_data}") #TODO: change so error is handled in front end
-    if not os.path.isfile(path_garden_data):
-        raise FileNotFoundError(f"File not found: {path_garden_data}") #TODO: change so error is handled in front end
-    if not os.path.isfile(path_school_data):
-        raise FileNotFoundError(f"File not found: {path_school_data}") #TODO: change so error is handled in front end
+    educator_df, garden_df,school_df = load_data(educator_data, garden_data, school_data)
 
+    data, timeslots = run_transformation(educator_df, garden_df, school_df)
+
+    execute_validations(config["validations"], data)
+    
+    return data["educator_df"], data["garden_df"], data["school_df"], timeslots
+    
+def load_data(educator_data, garden_data, school_data):
     # Load the Excel files
-    educator_df = pd.read_excel(path_educator_data)
-    garden_df = pd.read_excel(path_garden_data)
-    school_df = pd.read_excel(path_school_data)
+    educator_df = pd.read_excel(educator_data)
+    garden_df = pd.read_excel(garden_data)
+    school_df = pd.read_excel(school_data)
     
     return educator_df, garden_df, school_df
 
@@ -54,8 +47,14 @@ def run_transformation(educator_df, garden_df, school_df):
     school_df = transform_school_file(school_df)
     educator_df = transform_educator_file(educator_df)
     garden_df = transform_garden_file(garden_df)
+
+    output_data = {
+        'educator_df': educator_df,
+        'garden_df': garden_df,
+        'school_df': school_df,
+    }
     
-    return educator_df, garden_df, school_df, timeslots
+    return output_data, timeslots
 
 def get_timeslots(educator_data, excluded_cols_timeslots):
     timeslots = [col for col in educator_data.columns if col not in excluded_cols_timeslots]
@@ -137,12 +136,11 @@ def transform_educator_file(educator_df):
 def transform_garden_file(garden_df):    
     return garden_df
 
-def execute_validations(config, data):
+def execute_validations(validation_config, data):
     exceptions = []
-    for validation_name, validation_args in config['validations'].items():
+    for validation_name, validation_args in validation_config.items():
         validation_func = getattr(dv, validation_name)
         args = [data[arg_value] if 'df' in arg_key else arg_value for arg_key, arg_value in validation_args.items()]
-        print("yay")
         failure, message = validation_func(*args)
         if failure:
             table_names = [arg_value for arg_key, arg_value in validation_args.items() if 'df' in arg_key]

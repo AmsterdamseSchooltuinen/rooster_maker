@@ -1,6 +1,7 @@
 import streamlit as st
 from src.configs.get_config import get_config
 from src.streamlit import ValidationException
+from src.extract_transform_load import run_extract_transform_load
 
 def main():
     config = get_config("visual_config")
@@ -16,6 +17,7 @@ def main():
     school_bytes = st.file_uploader(school_label)
     garden_bytes = st.file_uploader(garden_label)
 
+
     if educators_bytes and school_bytes and garden_bytes:
         inputs_needed = False
 
@@ -27,11 +29,13 @@ def main():
 
     if run:
         try:
-            print("hi")
+            run_extract_transform_load(educators_bytes, garden_bytes, school_bytes)
         except ValidationException as e:
             st.error(f"{e.input_name}: {e}")
         except FileNotFoundError as e:
             st.error(f"File not found: {e}??")
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
 
 
 if __name__ == "__main__":
