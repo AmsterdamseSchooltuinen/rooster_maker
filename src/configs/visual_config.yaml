@@ -57,30 +57,43 @@ etl:
       - "Maximaal aantal bussen per tijdslot": "max_buses_per_timeslot"
       - "Aantal reserve tuintjes": "reserve_plots"
 validations:
-  check_duplicates:
-    df: school_df
-    col_names_to_check_duplicates: 
-      - "school_code"
-      - "name"
-      - "group"
-      
-    sort_by_col: "period_id"
-  check_nulls_in_key_cols:
-    df: school_df
-    key_cols: 
-      - "period_id"
-      - "school_code"
-      - "garden_name"
-  check_nulls_in_key_cols:
-    df: educator_df
-    key_cols: 
-      - "garden_name"
-      - "medewerker"
-  check_nulls_in_key_cols:
-    df: garden_df
-    key_cols: 
-      - "garden_name"
-  confirm_key_exists_and_is_identical:
-    key_col: garden_name
-    df_1: garden_df
-    df_2: school_df
+  # - test_validation:
+  #     df: school_df
+  #     key_cols: 
+  #       - "period_id"
+  #       - "school_code"
+  #       - "garden_name"
+  # - test_validation:
+  #     df: educator_df
+  #     key_cols: 
+  #       - "garden_name"
+  #       - "medewerker"
+  # - test_validation:
+  #     df: garden_df
+  #     key_cols: 
+  #       - "garden_name"
+  - check_duplicates:
+      df: school_df
+      col_names_to_check_duplicates: 
+        - "school_code"
+        - "name"
+        - "group"
+  - check_key_cols:
+      df: school_df
+      key_cols: 
+        - "period_id"
+        - "school_code"
+        - "garden_name"
+  - check_key_cols:
+      df: educator_df
+      key_cols: 
+        - "garden_name"
+        - "medewerker"
+  - check_key_cols:
+      df: garden_df
+      key_cols: 
+        - "garden_name"
+  - confirm_key_exists_and_is_identical:
+      key_col: garden_name
+      df_1: garden_df
+      df_2: school_df
