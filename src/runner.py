@@ -1,8 +1,7 @@
 import pandas as pd
 from garden import Garden
 from solver import solve_schedule_problem
-from somewhere import get_summary_statistics
-# TODO: change the import to be real
+from extract_transform_load import get_timeslots
 
 
 def run_program(school_data: pd.DataFrame, garden_data: pd.DataFrame, educator_data: pd.DataFrame):
@@ -24,35 +23,51 @@ def run_program(school_data: pd.DataFrame, garden_data: pd.DataFrame, educator_d
         current_educator_data = educator_data.loc[garden_data['garden_name'] == garden_name]
         current_garden_data = garden_data.loc[garden_data['garden_name'] == garden_name]
 
-        # TODO: extract the teacher availability based on the value of each column
-        # TODO: determine the format of the availability of groups, teachers and timeslots
+        time_slots = get_timeslots(current_educator_data, ['garden_name', 'educator'])
+
+        # Create the educator availability dictionaries
+        teacher_availability = {}
+        variable_teacher_availability = {}
+        for _, teacher_row in current_educator_data.iterrows():
+            available_mask = teacher_row.isin(["B", "V"])
+            available_times = teacher_row[available_mask]
+            variable_available_mask = teacher_row.isin(["V"])
+            variable_available_times = teacher_row[variable_available_mask]
+            teacher_availability[teacher_row["teacher"]] = list(available_times.index)
+            variable_teacher_availability[teacher_row["teacher"]] = list(
+                variable_available_times.index
+            )
 
         current_garden = Garden(name=garden_name,
-                                available_plots=current_garden_data['available_plots'],
-                                number_of_classrooms=current_garden_data['max_groups_per_timeslot'],
-                                number_of_max_buses=current_garden_data['max_buses_per_timeslot'],
+                                available_plots_with_reserve=current_garden_data['available_plots'],
+                                reserved_plots=current_garden_data['reserved_plots'],
+                                max_groups_per_time_slot=current_garden_data['max_groups_per_timeslot'],
+                                max_buses_per_time_slot=current_garden_data['max_buses_per_timeslot'],
+                                groups=list(current_school_data['group_id'].unique()),
+                                school_of_group=dict(zip(current_school_data['group_id'],
+                                                         current_school_data['school_id'])),
+                                group_sizes=dict(zip(current_school_data['group_id'],
+                                                     current_school_data['students'])),
+                                n_required_plots=dict(zip(current_school_data['group_id'],
+                                                          current_school_data['students']+2)),
                                 group_availability=dict(zip(current_school_data['group_id'],
                                                             [current_school_data['preference_1'],
                                                              current_school_data['preference_2'],
                                                              current_school_data['preference_3'],
                                                              current_school_data['preference_4'],
                                                              current_school_data['preference_5']])),
-                                time_slots=[1],
+                                time_slots=time_slots,
                                 teachers=list(current_educator_data['educator'].unique()),
-                                teacher_availability=dict(zip(current_educator_data['educator'],
-                                                              [current_educator_data['preference_1'],
-                                                               current_educator_data['preference_2'],
-                                                               current_educator_data['preference_3'],
-                                                               current_educator_data['preference_4'],
-                                                               current_educator_data['preference_5']])))
+                                teacher_availability=teacher_availability,
+                                variable_teacher_availability=variable_teacher_availability)
 
         # Solve the schedule problem
         solver_result = solve_schedule_problem(current_garden)
 
         # Get the summary statistics and output
-        summary_stats = get_summary_statistics(solver_result)
+        summary_stats = get_summary_statistics(solver_result, current_garden)
         all_summary_stats[garden_name] = summary_stats
-        output = format_output(solver_result)
+        output = format_output(solver_result, current_garden)
     return all_summary_stats, output
 
 
@@ -61,8 +76,23 @@ def extract_garden_data(garden_data: pd.DataFrame):
     return
 
 
-def format_output(solved_info: Object):
+def format_output(solved_info: Object, garden: Garden):
     # TODO: fill this function? Or import it from wherever it is now.
     return 1
 
 
+def get_summary_statistics(solved_info: Object, garden: Garden):
+    # Create the summary_statistics dictionary for the given garden
+    summary = {}
+    n_assigned_groups = 0
+    assigned_students = 0  # TODO!
+    for group in garden.groups:
+        for slot in garden.time_slots:
+            if solved_info.Value(assignment[(group, slot)]) == 1:
+                n_assigned_groups += 1
+    summary["available_plots"] = garden.available_plots
+    summary["reserved_plots"] = garden.reserved_plots
+    summary["total_groups"] = len(garden.group_sizes)
+    summary["assigned_groups"] = n_assigned_groups
+    summary["unassigned_groups"] = len(garden.group_sizes) - n_assigned_groups
+    return summary
