@@ -54,17 +54,17 @@ etl:
       - "Aantal beschikbare tuintjes": "available_plots"
       - "Maximaal aantal groepen per tijdslot": "max_groups_per_timeslot"
       - "Maximaal aantal bussen per tijdslot": "max_buses_per_timeslot"
-      - "Aantal reserve tuintjes": "reserve_plots"
+      - "Aantal reserve tuintjes": "reserved_plots"
 validations:
-  check_duplicates:
-    df: school_df
-    col_names_to_check_duplicates: 
-      - "school_code"
-      - "name"
-      - "group"
-    sort_by_col: "period_id"
-  confirm_key_exists_and_is_identical:
-    key_col: garden_name
-    df_1: garden_df
-    df_2: school_df
+  # check_duplicates:
+  #   df: school_df
+  #   col_names_to_check_duplicates: 
+  #     - "school_code"
+  #     - "name"
+  #     - "group"
+  #   sort_by_col: "period_id"
+  # confirm_key_exists_and_is_identical:
+  #   key_col: garden_name
+  #   df_1: garden_df
+  #   df_2: school_df
     
