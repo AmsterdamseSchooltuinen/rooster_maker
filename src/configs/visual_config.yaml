@@ -3,11 +3,15 @@ labels:
   educators_label: "Leraren Beschikbaarheid Data"
   school_label: Groep Beschikbaarheid Data"
   garden_label: "Schooltuinen Data"
+  run_label: "Run!!!"
 test:
   test_sub: 1
   test_sub_2: hello
 etl:
   school:
+    primary_keys: 
+      - "period_id"
+      - "school_code"
     col_mapping:
       - "code": code
       - "periodeid": period_id
@@ -29,10 +33,6 @@ etl:
       - "vrijveld5": preference_4
       - "vrijveld6": preference_5
       - "locatie": location
-    col_names_to_check_duplicates:
-      - schoolcode
-      - naam
-      - groep
     col_names_timeslots:
       - preference_1
       - preference_2
@@ -40,10 +40,15 @@ etl:
       - preference_4
       - preference_5
   educator:
+    primary_keys: 
+      - "garden_name"
+      - "medewerker"
     col_mapping:
       - "Tuinlocatie": "garden_name"
       - "Medewerker": "medewerker"
   garden:
+    primary_keys: 
+      - "garden_name"
     col_mapping:
       - "Tuinlocatie": "garden_name"
       - "Aantal beschikbare tuintjes": "available_plots"
@@ -54,12 +59,12 @@ validations:
   check_duplicates:
     df: school_df
     col_names_to_check_duplicates: 
-      - "schoolcode"
-      - "naam"
-      - "groep"
-    sort_by_col: "periodeid"
+      - "school_code"
+      - "name"
+      - "group"
+    sort_by_col: "period_id"
   confirm_key_exists_and_is_identical:
-    key_col: tuinlocatie
+    key_col: garden_name
     df_1: garden_df
     df_2: school_df
     
