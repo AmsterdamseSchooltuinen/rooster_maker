@@ -1,7 +1,8 @@
 import streamlit as st
 from src.configs.get_config import get_config
-from src.streamlit import ValidationException
 from src.extract_transform_load import run_extract_transform_load
+from src.data_validations import ValidationExceptionCollector
+
 import pandas as pd
 import matplotlib.pyplot as plt
 from io import BytesIO
@@ -20,9 +21,9 @@ def main():
     st.subheader(subheader_label)
     inputs_needed = True
 
-    educators_bytes = st.file_uploader(educators_label)
-    school_bytes = st.file_uploader(school_label)
-    garden_bytes = st.file_uploader(garden_label)
+    educators_bytes = st.file_uploader(educators_label, type = "xlsx")
+    school_bytes = st.file_uploader(school_label, type = "xlsx")
+    garden_bytes = st.file_uploader(garden_label, type = "xlsx")
 
     inputs_needed = not (educators_bytes and school_bytes and garden_bytes)
 
@@ -32,13 +33,12 @@ def main():
     run_override = st.button("Run even if inputs are missing")
     run = st.button(run_label, use_container_width=True, disabled=inputs_needed)
     
-    # run = st.button(run_label, use_container_width=True, disabled=inputs_needed)
     st.divider()
 
     if run or run_override:
         st.session_state.run_clicked = True        
         try:
-            # run_extract_transform_load(educators_bytes, garden_bytes, school_bytes)
+            run_extract_transform_load(educators_bytes, garden_bytes, school_bytes)
             
             # RUN EVERYTHING HERE 
             
@@ -49,8 +49,8 @@ def main():
                 'teachers': ['Nils', 'Floris'],
                 'assigned_students': 180,
                 'assigned_groups': 16,
-                'unassigned_groups': 2,
-                'unassigned_group_names': ['school a group a', 'school b group b'],
+                'unassigned_groups': 0,
+                'unassigned_group_names': [],
                 'percentage_groups_first_choice': 70,
                 'percentage_groups_second_choice': 12,
                 'percentage_groups_third_choice': 8, 
@@ -69,18 +69,18 @@ def main():
             'percentage_groups_third_choice': 7, 
             'percentage_groups_later_choice': 8,
             'percentage_groups_unallocated': 3
-            }}
+            }, 'Ander tuintje': 'Optimalisatie is niet gelukt'
+            }
             
             st.session_state.final_output_df = final_output_df
             st.session_state.summary_statistics_dict = summary_statistics_dict
             st.session_state.run_finished = True
 
-        except ValidationException as e:
-            st.error(f"{e.input_name}: {e}")
-        except FileNotFoundError as e:
-            st.error(f"File not found: {e}??")
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
+        except ValidationExceptionCollector as e:
+            st.header("❌ Er waren enkele problemen:", divider="red")
+            for ex in e.exceptions:
+                with st.error("Validatie Error"):
+                    st.markdown(f"**{ex}**")
     
     if st.session_state.get("run_finished", False):
         st.write(finished_run_label)
@@ -101,60 +101,37 @@ def main():
 
         if schooltuin:
             stats = st.session_state.summary_statistics_dict[schooltuin]
-            st.subheader(f"Statistics for {schooltuin}")
+            if isinstance(stats, str):
+                st.markdown(
+                    f"<span style='color: red; font-weight: bold;'>{stats}</span>",
+                    unsafe_allow_html=True
+                )
+            else:
+                st.subheader(f"Resultaten voor {schooltuin}")
 
-            st.write(f"**Beschikare tuintjes:** {stats['available_plots']}")
-            st.write(f"**Reserve tuintjes:** {stats['reserve_plots']}")
-            st.write(f"**Aantal medewerkers:** {', '.join(stats['teachers'])}")
-            st.write(f"**Aantal leerlingen ingedeeld:** {stats['assigned_students']}")
-            st.write(f"**Aantal groepen ingedeeld:** {stats['assigned_groups']}")
-            st.write(f"**Aantal groepen niet ingedeeld:** {stats['unassigned_groups']}")
-            st.write(f"**Groepen die niet zijn ingedeeld:** {', '.join(stats['unassigned_group_names'])}")
-    
-    # mock_output = {
-    #     'Alle tuinen': {
-    #         'available_plots': 300,
-    #         'reserve_plots': 40,
-    #         'teachers': ['Nils', 'Floris', 'Jacob', 'Amelia'],
-    #         'assigned_students': 280,
-    #         'assigned_groups': 16,
-    #         'unassigned_groups': 2,
-    #         'unassigned_group_names': ['school a group a', 'school b group b'],
-    #         'percentage_groups_first_choice': 60,
-    #         'percentage_groups_second_choice': 10,
-    #         'percentage_groups_third_choice': 10, 
-    #         'percentage_groups_later_choice': 10,
-    #         'percentage_groups_unallocated': 10
-    #     },
-    #     'Kalff Schooltuin': {
-    #         'available_plots': 200,
-    #         'reserve_plots': 20,
-    #         'teachers': ['Nils', 'Floris'],
-    #         'assigned_students': 180,
-    #         'assigned_groups': 16,
-    #         'unassigned_groups': 2,
-    #         'unassigned_group_names': ['school a group a', 'school b group b'],
-    #         'percentage_groups_first_choice': 70,
-    #         'percentage_groups_second_choice': 12,
-    #         'percentage_groups_third_choice': 8, 
-    #         'percentage_groups_later_choice': 7,
-    #         'percentage_groups_unallocated': 3
-    #     },
-    #     'Aemstel Schooltuin': {
-    #         'available_plots': 100,
-    #         'reserve_plots': 20,
-    #         'teachers': ['Jacob', 'Amelia'],
-    #         'assigned_students': 100,
-    #         'assigned_groups': 16,
-    #         'unassigned_groups': 2,
-    #         'unassigned_group_names': ['school a group a', 'school b group b'],
-    #         'percentage_groups_first_choice': 60,
-    #         'percentage_groups_second_choice': 22,
-    #         'percentage_groups_third_choice': 7, 
-    #         'percentage_groups_later_choice': 8,
-    #         'percentage_groups_unallocated': 3
-    #     }
-    # }
+                for key in stats.keys():
+                    if key != 'unassigned_groups':
+                        st.write(f"**{key}:** {stats[key]}")
+                
+                # st.write(f"**Beschikare tuintjes:** {stats['available_plots']}")
+                # st.write(f"**Reserve tuintjes:** {stats['reserve_plots']}")
+                # st.write(f"**Medewerkers:** {', '.join(stats['teachers'])}")
+                # st.write(f"**Aantal leerlingen ingedeeld:** {stats['assigned_students']}")
+                # st.write(f"**Aantal groepen ingedeeld:** {stats['assigned_groups']}")
+                if stats['unassigned_groups'] > 0:
+                    st.markdown(
+                        f"<span style='color: red; font-weight: bold;'>Aantal groepen niet ingedeeld: {stats['unassigned_groups']}</span>",
+                        unsafe_allow_html=True
+                    )
+                    st.markdown(
+                        f"<span style='color: red; font-weight: bold;'>Groepen die niet zijn ingedeeld: {', '.join(stats['unassigned_group_names'])}</span>",
+                        unsafe_allow_html=True
+                    )
+                else:
+                    st.write(f"**Aantal groepen niet ingedeeld:** {stats['unassigned_groups']}")
+                    st.write(f"**Groepen die niet zijn ingedeeld:** {', '.join(stats['unassigned_group_names'])}")
+          
+                
     
     # # Streamlit app
     # st.title("Distributie keuzes")

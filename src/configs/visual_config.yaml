@@ -2,8 +2,8 @@ labels:
   title_label: "Schooltuinen Amsterdam Roosterplanner"
   # subheader_label: "*** Uitleg voor gebruik ***"
   subheader_label: |
-      Amsterdamse Schooltuinen X Amsterdam Data Collective - Collective Week 2025
-      Gebruiksinstructie programma:  
+      Amsterdamse Schooltuinen X ADC - Collective Week 2025
+      **Gebruiksaanwijzing programma:** 
 
       **Stap 1.** Upload drie bestanden:  
         - **A. Beschikbaarheid medewerkers:** De beschikbaarheid van alle medewerkers op alle mogelijke uren voor specifieke tuinen. Een 'N' betekent dat de leraar niet beschikbaar is, een 'B' betekent dat de leraar beschikbaar is.  
@@ -13,8 +13,6 @@ labels:
       **Stap 2.** Klik op '_Draai Programma_' en wacht tot de '_Klaar met optimalisatie_' tekst en de resultaten verschijnen. De resultaten laten informatie over de optimilisatie zien, zoals bijvoorbeeld hoeveel groepen niet zijn ingedeeld per tuin.
 
       **Stap 3.** Download geoptimaliseerd rooster door op '_Download Resultaten_' te klikken.
-
-      
   educators_label: "Beschikbaarheid medewerkers"
   school_label: "Beschikbaarheid groepen"
   garden_label: "Schooltuinen informatie"
@@ -28,6 +26,7 @@ etl:
     primary_keys: 
       - "period_id"
       - "school_code"
+      - "garden_name"
     col_mapping:
       - "code": code
       - "periodeid": period_id
@@ -72,15 +71,43 @@ etl:
       - "Maximaal aantal bussen per tijdslot": "max_buses_per_timeslot"
       - "Aantal reserve tuintjes": "reserve_plots"
 validations:
-  check_duplicates:
-    df: school_df
-    col_names_to_check_duplicates: 
-      - "school_code"
-      - "name"
-      - "group"
-    sort_by_col: "period_id"
-  confirm_key_exists_and_is_identical:
-    key_col: garden_name
-    df_1: garden_df
-    df_2: school_df
-    
+  # - test_validation:
+  #     df: school_df
+  #     key_cols: 
+  #       - "period_id"
+  #       - "school_code"
+  #       - "garden_name"
+  # - test_validation:
+  #     df: educator_df
+  #     key_cols: 
+  #       - "garden_name"
+  #       - "medewerker"
+  # - test_validation:
+  #     df: garden_df
+  #     key_cols: 
+  #       - "garden_name"
+  - check_duplicates:
+      df: school_df
+      col_names_to_check_duplicates: 
+        - "school_code"
+        - "name"
+        - "group"
+  - check_key_cols:
+      df: school_df
+      key_cols: 
+        - "period_id"
+        - "school_code"
+        - "garden_name"
+  - check_key_cols:
+      df: educator_df
+      key_cols: 
+        - "garden_name"
+        - "medewerker"
+  - check_key_cols:
+      df: garden_df
+      key_cols: 
+        - "garden_name"
+  - confirm_key_exists_and_is_identical:
+      key_col: garden_name
+      df_1: garden_df
+      df_2: school_df
