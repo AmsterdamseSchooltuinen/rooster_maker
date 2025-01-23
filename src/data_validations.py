@@ -56,7 +56,29 @@ def confirm_key_exists_and_is_identical(key_col: str, df1: pd.DataFrame, df2: pd
     if key_col not in df1.columns or key_col not in df2.columns:
         return True, f"Key column {key_col} does not exist in both dataframes"
 
-    if not df1[key_col].equals(df2[key_col]):
-        return True, f"Key column ({key_col}) values are not identical"
+    unique_values_df1 = df1[key_col].unique()
+    unique_values_df2 = df2[key_col].unique()
 
+    print(unique_values_df1)
+    print(unique_values_df2)
+
+    if not unique_values_df1 == unique_values_df2:
+        return True, f"Key column ({key_col}) values are not identical \n{unique_values_df1} \n{unique_values_df2}"
+
+    return False, "All good"
+
+def blank_values_in_key_cols(df: pd.DataFrame, key_cols: list[str]) -> tuple[bool, str]:
+    """
+    Check if there are any blank values in the key columns of a DataFrame.
+    
+    Parameters:
+        df (pd.DataFrame): The DataFrame to check.
+        key_cols (list[str]): The key columns to check.
+        
+    Returns:
+        bool: True if there are blank values in the key columns, False otherwise.
+    """
+    for col in key_cols:
+        if df[col].isnull().values.any():
+            return True, f"Blank values found in key column {col}"
     return False, "All good"
