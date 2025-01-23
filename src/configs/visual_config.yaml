@@ -1,3 +1,8 @@
+labels:
+  title_label: "Goede morgen!"
+  educators_label: "Leraren Beschikbaarheid Data"
+  school_label: Groep Beschikbaarheid Data"
+  garden_label: "Schooltuinen Data"
 test:
   test_sub: 1
   test_sub_2: hello

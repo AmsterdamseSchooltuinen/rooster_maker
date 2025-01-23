@@ -11,6 +11,8 @@ pandas = "^2.2.3"
 ipykernel = "^6.29.5"
 pyyaml = "^6.0.2"
 ortools = "^9.11.4210"
+streamlit = "^1.41.1"
+openpyxl = "^3.1.5"
 
 
 [build-system]

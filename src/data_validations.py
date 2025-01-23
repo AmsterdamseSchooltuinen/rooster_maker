@@ -53,7 +53,6 @@ def confirm_key_exists_and_is_identical(key_col: str, df1: pd.DataFrame, df2: pd
     Returns:
         bool: True if the key column does not exist in both dataframes or if the values are not identical, False otherwise.
     """
-    print("yay")
     if key_col not in df1.columns or key_col not in df2.columns:
         return True, f"Key column {key_col} does not exist in both dataframes"
 
