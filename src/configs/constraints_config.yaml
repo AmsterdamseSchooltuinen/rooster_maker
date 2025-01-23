@@ -27,7 +27,7 @@ each_educator_max_once_per_time_slot:
   hard_constraint: true
 
 educator_gets_one_slot_of_for_variable_availability:
-  included: true
+  included: false
   hard_constraint: true
 
 

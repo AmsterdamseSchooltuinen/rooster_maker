@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from typing import Optional
-from ortools.sat.python import cp_model
 from src.configs.get_config import get_config
 
 
@@ -24,7 +23,9 @@ class Garden:
     n_required_plots: dict  # {group: size+2} includes the demo plots
     school_of_group: dict  # {group: school}
 
-    available_plots: int = available_plots_with_reserve - reserved_plots
+    def __post_init__(self):
+        self.available_plots = self.available_plots_with_reserve - self.reserved_plots
+        self._set_constraints()
 
     def _set_constraints(self, front_end_constraints: Optional[dict] = None) -> None:
         """Set the constraints for the garden."""

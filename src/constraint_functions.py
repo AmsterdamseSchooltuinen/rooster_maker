@@ -35,10 +35,13 @@ def each_group_max_once_per_week(
 ) -> cp_model.CpModel:
     """Each group can only be scheduled at most once per week."""
     for group in garden.groups:
-        model.add_at_most_one(
-            availability[(group, time, teacher)]
-            for time in garden.time_slots
-            for teacher in garden.teachers
+        model.Add(
+            sum(
+                availability[(group, time, teacher)]
+                for time in garden.time_slots
+                for teacher in garden.teachers
+            )
+            <= 1
         )
 
     return model
@@ -167,6 +170,7 @@ def add_constraints(
     for constraint in garden.constraints:
         if constraint not in CONSTRAINT_METHODS:
             raise ValueError(f"Constraint {constraint} is not implemented.")
+        print(f"adding {constraint}")
         model = CONSTRAINT_METHODS[constraint](garden, model, availability)
 
     return model
