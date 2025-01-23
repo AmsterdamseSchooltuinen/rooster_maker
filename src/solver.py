@@ -3,7 +3,7 @@ from src.constraint_functions import add_constraints
 from src.garden import Garden
 
 
-def solve_schedule_problem(garden: Garden) -> tuple[cp_model.CpModel, dict]:
+def solve_schedule_problem(garden: Garden) -> tuple[cp_model.CpSolver, dict, bool]:
     """
     This function creates the garden's schedule by solving the optimization
     :param garden: contains all information about the garden such as its availability,
@@ -35,11 +35,11 @@ def solve_schedule_problem(garden: Garden) -> tuple[cp_model.CpModel, dict]:
 
     # Return results
     if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
-        return solver, availability
+        solved_status = True
     else:
-        print("INFEASIBLE")
-        return solver, availability
-        # TODO: what happens if non-feasible solution?
+        solved_status = False
+
+    return solver, availability, solved_status
 
 
 def make_group_teacher_time_slots_dict(garden: Garden, model: cp_model.CpModel) -> dict:

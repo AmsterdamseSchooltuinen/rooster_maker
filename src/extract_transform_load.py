@@ -27,13 +27,16 @@ def run_extract_transform_load(
     if not school_data:
         school_data = file_path_school_data
 
-
     educator_df, garden_df, school_df = load_data(educator_data, garden_data, school_data)
 
     data, timeslots = run_transformation(educator_df, garden_df, school_df)
 
-    execute_validations(config["validations"], data)
-
+    try:
+        execute_validations(config["validations"], data)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        raise e
+    
     return data["educator_df"], data["garden_df"], data["school_df"], timeslots
 
 
@@ -78,6 +81,7 @@ def run_transformation(educator_df, garden_df, school_df):
     garden_df = clean_primary_keys(
         garden_df, primary_keys=config["etl"]["garden"]["primary_keys"]
     )
+
 
     output_data = {
         "educator_df": educator_df,
