@@ -22,6 +22,8 @@ class Garden:
     group_sizes: dict  # {group: size}
     n_required_plots: dict  # {group: size+2} includes the demo plots
     school_of_group: dict  # {group: school}
+    group_uses_bus: dict  # {group: transport}
+    groups_that_go_together_with_bus_per_school: dict  # {school: [group_1, group_2]}
 
     def __post_init__(self):
         self.available_plots = self.available_plots_with_reserve - self.reserved_plots

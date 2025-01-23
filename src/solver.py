@@ -1,6 +1,7 @@
 from ortools.sat.python import cp_model
 from src.constraint_functions import add_constraints
 from src.garden import Garden
+import time
 
 
 def solve_schedule_problem(garden: Garden) -> tuple[cp_model.CpSolver, dict, bool]:
@@ -17,6 +18,7 @@ def solve_schedule_problem(garden: Garden) -> tuple[cp_model.CpSolver, dict, boo
     # print(garden.n_required_plots)
 
     availability = make_group_teacher_time_slots_dict(garden, model)
+
     model = add_constraints(
         garden,
         model,
@@ -31,8 +33,11 @@ def solve_schedule_problem(garden: Garden) -> tuple[cp_model.CpSolver, dict, boo
 
     # Solve the model
     solver = cp_model.CpSolver()
-    status = solver.Solve(model)
+    solver.parameters.max_time_in_seconds = 10
 
+    start = time.time()
+    status = solver.Solve(model)
+    print(f"Time: {time.time() - start:.2f} s")
     # Return results
     if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
         solved_status = True
@@ -52,6 +57,8 @@ def make_group_teacher_time_slots_dict(garden: Garden, model: cp_model.CpModel) 
                 group_time_teacher_availability[(group, time, teacher)] = (
                     model.NewBoolVar(f"{group}_{time}_{teacher}")
                 )
+
+    print("search space size:", len(group_time_teacher_availability))
     return group_time_teacher_availability
 
 

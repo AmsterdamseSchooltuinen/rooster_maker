@@ -24,7 +24,9 @@ def run_program(
     unique_gardens = garden_data["garden_name"].unique()
     all_summary_stats = {}
     output = None
-    for garden_name in unique_gardens[:1]:
+
+    for garden_name in unique_gardens:
+        print(garden_name)
         # Subset the data to only include data relevant to the current garden
         current_school_data = school_data.loc[school_data["garden_name"] == garden_name]
         current_educator_data = educator_data.loc[
@@ -52,6 +54,9 @@ def run_program(
         school_of_group = {}
         group_sizes = {}
         n_required_plots = {}
+        group_uses_bus = {}
+        groups_that_go_together_with_bus_per_school = {}
+
         for _, row in current_school_data.iterrows():
             group_availability[row["period_id"]] = [
                 row["preference_1"],
@@ -64,6 +69,19 @@ def run_program(
             school_of_group[row["period_id"]] = row["school_id"]
             group_sizes[row["period_id"]] = row["students"]
             n_required_plots[row["period_id"]] = row["students"] + 2
+            group_uses_bus[row["period_id"]] = (
+                1 if row["transport_type"] == "bus" else 0
+            )
+            if row["transport_type"] == "bus":
+                if row["school_id"] in groups_that_go_together_with_bus_per_school:
+                    groups_that_go_together_with_bus_per_school[
+                        row["school_id"]
+                    ].append(row["period_id"])
+                else:
+                    groups_that_go_together_with_bus_per_school[row["school_id"]] = [
+                        row["period_id"]
+                    ]
+        display(groups_that_go_together_with_bus_per_school)
 
         current_garden = Garden(
             name=garden_name,
@@ -81,16 +99,19 @@ def run_program(
                 current_garden_data["max_buses_per_timeslot"].values[0]
             ),
             school_of_group=school_of_group,
+            group_uses_bus=group_uses_bus,
             group_sizes=group_sizes,
             n_required_plots=n_required_plots,
             group_availability=group_availability,
             teacher_availability=teacher_availability,
             variable_teacher_availability=variable_teacher_availability,
+            groups_that_go_together_with_bus_per_school=groups_that_go_together_with_bus_per_school,
         )
 
         # Solve the schedule problem
         solver_result, assignment, solved = solve_schedule_problem(current_garden)
 
+        display(current_educator_data)
         # Get the summary statistics and output
         summary_stats = get_summary_statistics(solver_result,
                                                current_garden,
@@ -123,18 +144,18 @@ def get_summary_statistics(solved_info: cp_model.CpSolver,
         schedule = pd.DataFrame(index=garden.teachers, columns=garden.time_slots)
         schedule = schedule.fillna("")
 
-        for group in garden.groups:
-            for time in garden.time_slots:
-                for teacher in garden.teachers:
-                    if solved_info.Value(assignment[(group, time, teacher)]) == 1:
-                        assigned_groups.append(group)
-                        schedule.at[teacher, time] = (
-                            f"{group} ({garden.group_sizes[group]})"
-                        )
-                        assigned_students += garden.group_sizes[group]
-                    elif solved_info.Value(assignment[(group, time, teacher)]) == 0:
-                        unassigned_groups.append(group)
-                        unassigned_students += garden.group_sizes[group]
+    for group in garden.groups:
+        for time in garden.time_slots:
+            for teacher in garden.teachers:
+                if solved_info.Value(assignment[(group, time, teacher)]) == 1:
+                    assigned_groups.append(group)
+                    schedule.at[teacher, time] = (
+                        f"{group} (size: {garden.group_sizes[group]}) (bus: {garden.group_uses_bus[group]})"
+                    )
+                    assigned_students += garden.group_sizes[group]
+                elif solved_info.Value(assignment[(group, time, teacher)]) == 0:
+                    unassigned_groups.append(group)
+                    unassigned_students += garden.group_sizes[group]
         summary = {'assigned_groups': assigned_groups,
                    'unassigned_groups': unassigned_groups,
                    'assigned_students': assigned_students,
