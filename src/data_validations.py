@@ -19,8 +19,11 @@ def check_duplicates(df: pd.DataFrame, col_names_to_check_duplicates: list[str] 
     duplicate_mask = df.duplicated(subset=col_names_to_check_duplicates, keep=False)
     duplicates = df[duplicate_mask]
 
+    duplicate_values = duplicates[col_names_to_check_duplicates[0]].to_list()
+    
+
     if not duplicates.empty:
-        return True, "Duplicates found"
+        return True, f"Er staat een dubbele rij met dezelfde: {col_names_to_check_duplicates}: {duplicate_values}"
     return False, "All good"
     # sort_by_col_len = f"{sort_by_col}_len"
     # df[sort_by_col_len] = df[sort_by_col].str.len()
@@ -56,18 +59,15 @@ def confirm_key_exists_and_is_identical(key_col: str, df1: pd.DataFrame, df2: pd
     if key_col not in df1.columns or key_col not in df2.columns:
         return True, f"Key column {key_col} does not exist in both dataframes"
 
-    unique_values_df1 = df1[key_col].unique()
-    unique_values_df2 = df2[key_col].unique()
+    unique_values_df1 = df1[key_col].to_list()
+    unique_values_df2 = df2[key_col].to_list()
 
-    print(unique_values_df1)
-    print(unique_values_df2)
-
-    if not unique_values_df1 == unique_values_df2:
+    if not (set(unique_values_df1) == set(unique_values_df2)):
         return True, f"Key column ({key_col}) values are not identical \n{unique_values_df1} \n{unique_values_df2}"
 
     return False, "All good"
 
-def blank_values_in_key_cols(df: pd.DataFrame, key_cols: list[str]) -> tuple[bool, str]:
+def check_nulls_in_key_cols(df: pd.DataFrame, key_cols: list[str]) -> tuple[bool, str]:
     """
     Check if there are any blank values in the key columns of a DataFrame.
     
