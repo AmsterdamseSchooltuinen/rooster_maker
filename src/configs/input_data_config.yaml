@@ -6,7 +6,7 @@ etl:
     col_mapping:
       "code": code
       "periodeid": period_id
-      "schoolcode": school_code
+      "schoolcode": school_id
       "naam": name
       "lopenofbus": transport_type
       "telefoon": phone
