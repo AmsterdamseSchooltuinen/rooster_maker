@@ -101,7 +101,8 @@ def educator_gets_one_slot_of_for_variable_availability(
 ) -> cp_model.CpModel:
     """Educators can define multiple hours of which 1 needs to be unavailable."""
     for teacher in garden.teachers:
-        if teacher not in garden.variable_teacher_availability:
+        # If there are no variable teacher availabilities, we can skip this teacher
+        if len(garden.variable_teacher_availability[teacher]) == 0:
             continue
 
         variable_teacher_availability = garden.variable_teacher_availability[teacher]
@@ -116,20 +117,72 @@ def educator_gets_one_slot_of_for_variable_availability(
     return model
 
 
-# def max_buses_per_time_slot(
-#     garden: Garden, model: cp_model.CpModel, availability: dict
-# ) -> cp_model.CpModel:
-#     return model
+def max_buses_per_time_slot(
+    garden: Garden, model: cp_model.CpModel, availability: dict
+) -> cp_model.CpModel:
+    for time in garden.time_slots:
+        model.Add(
+            sum(
+                garden.group_uses_bus[group] * availability[(group, time, teacher)]
+                for group in garden.groups
+                for teacher in garden.teachers
+            )
+            <= garden.max_buses_per_time_slot
+        )
+    return model
 
-# def educator_needs_one_maintenance_slots(
-#     garden: Garden, model: cp_model.CpModel, availability: dict
-# ) -> cp_model.CpModel:
-#     return model
 
-# def bus_groups_of_same_school_go_together(
-#     garden: Garden, model: cp_model.CpModel, availability: dict
-# ) -> cp_model.CpModel:
-#     return model
+def educators_need_maintenance_slots(
+    garden: Garden, model: cp_model.CpModel, availability: dict
+) -> cp_model.CpModel:
+    for teacher in garden.teachers:
+        teacher_availability = garden.teacher_availability[teacher]
+        working_days = list(set(day.split()[0] for day in teacher_availability))
+
+        if len(working_days) == 5:
+            # If somebody works 5 days, you need an additional maintenance slot extra on top of the wednesday afternoon
+            maintenance_slots = 2
+        elif "woensdag" not in working_days and len(working_days) >= 3:
+            maintenance_slots = 1
+        else:
+            maintenance_slots = 0
+
+        model.Add(
+            sum(
+                availability[(group, time, teacher)]
+                for group in garden.groups
+                for time in garden.time_slots
+            )
+            <= len(teacher_availability) - maintenance_slots
+        )
+
+    return model
+
+
+def bus_groups_of_same_school_go_together(
+    garden: Garden, model: cp_model.CpModel, availability: dict
+) -> cp_model.CpModel:
+    for school, groups in garden.groups_that_go_together_with_bus_per_school.items():
+        for time in garden.time_slots:
+            if len(groups) <= (garden.max_buses_per_time_slot * 2):
+                model.AddBoolOr(
+                    [
+                        sum(
+                            availability[(group, time, teacher)]
+                            for group in groups
+                            for teacher in garden.teachers
+                        )
+                        == len(groups),
+                        sum(
+                            availability[(group, time, teacher)]
+                            for group in groups
+                            for teacher in garden.teachers
+                        )
+                        == 0,
+                    ]
+                )
+
+    return model
 
 
 # def constraint(
@@ -146,9 +199,9 @@ CONSTRAINT_METHODS = {
     "no_more_students_than_plots": no_more_students_than_plots,
     "each_educator_max_once_per_time_slot": each_educator_max_once_per_time_slot,
     "educator_gets_one_slot_of_for_variable_availability": educator_gets_one_slot_of_for_variable_availability,
-    # "max_buses_per_time_slot": max_buses_per_time_slot,
-    # "educator_needs_one_maintenance_slots": educator_needs_one_maintenance_slots,
-    # "bus_groups_of_same_school_go_together": bus_groups_of_same_school_go_together,
+    "max_buses_per_time_slot": max_buses_per_time_slot,
+    "educators_need_maintenance_slots": educators_need_maintenance_slots,
+    "bus_groups_of_same_school_go_together": bus_groups_of_same_school_go_together,
     # "constraint": constraint,
 }
 
@@ -170,7 +223,6 @@ def add_constraints(
     for constraint in garden.constraints:
         if constraint not in CONSTRAINT_METHODS:
             raise ValueError(f"Constraint {constraint} is not implemented.")
-        print(f"adding {constraint}")
         model = CONSTRAINT_METHODS[constraint](garden, model, availability)
 
     return model
