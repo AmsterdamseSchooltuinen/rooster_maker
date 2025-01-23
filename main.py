@@ -3,11 +3,13 @@ from src.configs.get_config import get_config
 from src.streamlit import ValidationException
 from src.extract_transform_load import run_extract_transform_load
 
+
 def main_test():
     run_extract_transform_load(None, None, None)
 
+
 def main():
-    config = get_config("visual_config")
+    config = get_config("input_data_config")
     title_label = config["labels"]["title_label"]
     educators_label = config["labels"]["educators_label"]
     school_label = config["labels"]["school_label"]
@@ -21,7 +23,11 @@ def main():
     school_bytes = st.file_uploader(school_label)
     garden_bytes = st.file_uploader(garden_label)
 
-    if educators_bytes is not None and school_bytes is not None and garden_bytes is not None:
+    if (
+        educators_bytes is not None
+        and school_bytes is not None
+        and garden_bytes is not None
+    ):
         inputs_needed = False
 
     run_override = st.button("Run even if inputs are missing")
@@ -42,4 +48,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main_test()
+    main()
