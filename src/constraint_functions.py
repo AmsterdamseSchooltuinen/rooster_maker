@@ -4,7 +4,7 @@ from ortools.sat.python import cp_model
 
 def only_schedule_groups_when_they_are_available(
     garden: Garden, model: cp_model.CpModel, availability: dict
-) -> tuple[cp_model.CpModel, dict]:
+) -> cp_model.CpModel:
     """Only assign a group if they are available at that time."""
     for group in garden.groups:
         group_availability = garden.group_availability[group]
@@ -18,7 +18,7 @@ def only_schedule_groups_when_they_are_available(
 
 def only_schedule_teachers_when_they_are_available(
     garden: Garden, model: cp_model.CpModel, availability: dict
-) -> tuple[cp_model.CpModel, dict]:
+) -> cp_model.CpModel:
     """Only assign a teacher if he/she is available at that time."""
     for teacher in garden.teachers:
         teacher_availability = garden.teacher_availability[teacher]
@@ -32,7 +32,7 @@ def only_schedule_teachers_when_they_are_available(
 
 def each_group_max_once_per_week(
     garden: Garden, model: cp_model.CpModel, availability: dict
-) -> tuple[cp_model.CpModel, dict]:
+) -> cp_model.CpModel:
     """Each group can only be scheduled at most once per week."""
     for group in garden.groups:
         model.add_at_most_one(
@@ -46,7 +46,7 @@ def each_group_max_once_per_week(
 
 def max_number_of_groups_per_time_slot(
     garden: Garden, model: cp_model.CpModel, availability: dict
-) -> tuple[cp_model.CpModel, dict]:
+) -> cp_model.CpModel:
     """
     There cannot be more groups than the max available groups per time slot.
     So we check if the total active groups per time slot is less than or equal to the max groups per time slot.
@@ -65,7 +65,7 @@ def max_number_of_groups_per_time_slot(
 
 def no_more_students_than_plots(
     garden: Garden, model: cp_model.CpModel, availability: dict
-) -> tuple[cp_model.CpModel, dict]:
+) -> cp_model.CpModel:
     """The total number of students must not exceed the available plots.
     This is the total for the whole week.
     """
@@ -83,7 +83,7 @@ def no_more_students_than_plots(
 
 def each_educator_max_once_per_time_slot(
     garden: Garden, model: cp_model.CpModel, availability: dict
-) -> tuple[cp_model.CpModel, dict]:
+) -> cp_model.CpModel:
     """Each educator can only teach one group per time slot."""
     for teacher in garden.teachers:
         for time in garden.time_slots:
@@ -95,7 +95,7 @@ def each_educator_max_once_per_time_slot(
 
 def educator_gets_one_slot_of_for_variable_availability(
     garden: Garden, model: cp_model.CpModel, availability: dict
-) -> tuple[cp_model.CpModel, dict]:
+) -> cp_model.CpModel:
     """Educators can define multiple hours of which 1 needs to be unavailable."""
     for teacher in garden.teachers:
         if teacher not in garden.variable_teacher_availability:
@@ -115,23 +115,23 @@ def educator_gets_one_slot_of_for_variable_availability(
 
 # def max_buses_per_time_slot(
 #     garden: Garden, model: cp_model.CpModel, availability: dict
-# ) -> tuple[cp_model.CpModel, dict]:
+# ) -> cp_model.CpModel:
 #     return model
 
 # def educator_needs_one_maintenance_slots(
 #     garden: Garden, model: cp_model.CpModel, availability: dict
-# ) -> tuple[cp_model.CpModel, dict]:
+# ) -> cp_model.CpModel:
 #     return model
 
 # def bus_groups_of_same_school_go_together(
 #     garden: Garden, model: cp_model.CpModel, availability: dict
-# ) -> tuple[cp_model.CpModel, dict]:
+# ) -> cp_model.CpModel:
 #     return model
 
 
 # def constraint(
 #     garden: Garden, model: cp_model.CpModel, availability: dict
-# ) -> tuple[cp_model.CpModel, dict]:
+# ) -> cp_model.CpModel:
 #     return model
 
 
@@ -152,7 +152,7 @@ CONSTRAINT_METHODS = {
 
 def add_constraints(
     garden: Garden, model: cp_model.CpModel, availability: dict
-) -> tuple[cp_model.CpModel, dict]:
+) -> cp_model.CpModel:
     """Add all constraints to the model and availability dictionary.
 
     Args:
