@@ -1,3 +1,4 @@
+
 from ortools.sat.python import cp_model
 from constraint_functions import add_constraints
 from src.garden import Garden
@@ -86,3 +87,4 @@ def define_objective_function(garden: Garden, assignment: dict):
         for group in garden.groups
         for slot in garden.time_slots
     )
+
