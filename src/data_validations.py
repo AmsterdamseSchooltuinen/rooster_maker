@@ -2,7 +2,7 @@
 import pandas as pd
 from src.configs.get_config import get_config
 
-config = get_config("visual_config")
+config = get_config("input_data_config")
 
 class ValidationException(Exception):
     def __init__(self, message, input_name):

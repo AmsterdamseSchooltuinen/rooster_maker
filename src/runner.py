@@ -3,7 +3,7 @@ from ortools.sat.python import cp_model
 
 from src.garden import Garden
 from src.solver import solve_schedule_problem
-from src.excel_output_formatter import create_excel_output
+# from src.excel_output_formatter import create_excel_output
 
 
 def run_program(
@@ -103,8 +103,9 @@ def run_program(
 
 def format_output(solved_info: cp_model.CpSolver, garden: Garden):
     # TODO: fill this function with Thomas' code! It returns the information per garden.
-    df_excel = create_excel_output(output_data=x, unassigned_data=y)
-    return df_excel
+    # df_excel = create_excel_output(output_data=x, unassigned_data=y)
+    # return df_excel
+    return pd.DataFrame()
 
 
 def get_summary_statistics(solved_info: cp_model.CpSolver,

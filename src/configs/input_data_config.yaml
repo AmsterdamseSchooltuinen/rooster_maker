@@ -79,7 +79,7 @@ validations:
   #     df: school_df
   #     key_cols: 
   #       - "period_id"
-  #       - "school_code"
+  #       - "school_id"
   #       - "garden_name"
   # - test_validation:
   #     df: educator_df
@@ -93,14 +93,14 @@ validations:
   - check_duplicates:
       df: school_df
       col_names_to_check_duplicates: 
-        - "school_code"
+        - "school_id"
         - "name"
         - "group"
   - check_key_cols:
       df: school_df
       key_cols: 
         - "period_id"
-        - "school_code"
+        - "school_id"
         - "garden_name"
   - check_key_cols:
       df: educator_df
