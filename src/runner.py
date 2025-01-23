@@ -3,6 +3,7 @@ from ortools.sat.python import cp_model
 
 from src.garden import Garden
 from src.solver import solve_schedule_problem
+from src.excel_output_formatter import create_excel_output
 
 
 def run_program(
@@ -103,8 +104,8 @@ def run_program(
 
 def format_output(solved_info: cp_model.CpSolver, garden: Garden):
     # TODO: fill this function with Thomas' code! It returns the information per garden.
-    # Call the excel formatting function!
-    return 1
+    df_excel = create_excel_output(output_data=x, unassigned_data=y)
+    return df_excel
 
 
 def get_summary_statistics(solved_info: cp_model.CpSolver,
@@ -117,6 +118,8 @@ def get_summary_statistics(solved_info: cp_model.CpSolver,
         summary = {}
         assigned_groups = []
         assigned_students = 0
+        unassigned_groups = []
+        unassigned_students = 0
         schedule = pd.DataFrame(index=garden.teachers, columns=garden.time_slots)
         schedule = schedule.fillna("")
 
@@ -129,6 +132,14 @@ def get_summary_statistics(solved_info: cp_model.CpSolver,
                             f"{group} ({garden.group_sizes[group]})"
                         )
                         assigned_students += garden.group_sizes[group]
+                    elif solved_info.Value(assignment[(group, time, teacher)]) == 0:
+                        unassigned_groups.append(group)
+                        unassigned_students += garden.group_sizes[group]
+        summary = {'assigned_groups': assigned_groups,
+                   'unassigned_groups': unassigned_groups,
+                   'assigned_students': assigned_students,
+                   'unassigned_students': unassigned_students,
+                   'schedule': schedule}
 
     # If there was no feasible solution found, store information about that
     else:
