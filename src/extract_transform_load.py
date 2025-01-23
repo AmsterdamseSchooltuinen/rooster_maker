@@ -137,7 +137,6 @@ def transform_educator_file(educator_df):
 def transform_garden_file(garden_df):    
     return garden_df
 
-
 def execute_validations(config, data):
     exceptions = []
     for validation_name, validation_args in config['validations'].items():
