@@ -71,7 +71,7 @@ def no_more_students_than_plots(
     """
     model.Add(
         sum(
-            garden.needed_plots[group] * availability[(group, time, teacher)]
+            garden.n_required_plots[group] * availability[(group, time, teacher)]
             for group in garden.groups
             for time in garden.time_slots
             for teacher in garden.teachers
