@@ -1,135 +1,105 @@
-import pandas as pd
-import re
 import os
+import re
+
+import pandas as pd
+
+import src.data_validations as dv
 from src.configs.get_config import get_config
-from src.data_validations import find_and_remove_duplicates
+from src.data_validations import ValidationException
 
-config = get_config("etl_config")
+config = get_config("visual_config")
 
+# Move this to the front end in final version
 current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 file_path_educator_data = os.path.join(current_dir, 'data', 'EDUCATORS 2025.xlsx')
 file_path_garden_data = os.path.join(current_dir, 'data', 'SCHOOL GARDENS 2025.xlsx')
 file_path_school_data = os.path.join(current_dir, 'data', 'SCHOOLS 2025.xlsx')
-
-class ValidationException(Exception):
-    def __init__(self, message, input_name):
-        super().__init__(message)
-        self.input_name = input_name
     
-def run_extract_transform_load(config):
-    path_educator_data = file_path_educator_data # change to config 
-    path_garden_data = file_path_garden_data # change to config
-    path_school_data = file_path_school_data # change to config
+def run_extract_transform_load(educator_data: bytes, garden_data: bytes, school_data: bytes):
 
-    educator_df, garden_df,school_df = load_data(path_educator_data, path_garden_data, path_school_data)
-    run_data_validation(educator_df, garden_df, school_df)
-    
-    return
-    
-def load_data(path_educator_data, path_garden_data, path_school_data):
-    # Check if each file exists
-    if not os.path.isfile(path_educator_data):
-        raise FileNotFoundError(f"File not found: {path_educator_data}") #TODO: change so error is handled in front end
-    if not os.path.isfile(path_garden_data):
-        raise FileNotFoundError(f"File not found: {path_garden_data}") #TODO: change so error is handled in front end
-    if not os.path.isfile(path_school_data):
-        raise FileNotFoundError(f"File not found: {path_school_data}") #TODO: change so error is handled in front end
+    if not educator_data:
+        educator_data = file_path_educator_data
+    if not garden_data:
+        garden_data = file_path_garden_data
+    if not school_data:
+        school_data = file_path_school_data
 
+    educator_df, garden_df, school_df = load_data(educator_data, garden_data, school_data)
+
+
+    data, timeslots = run_transformation(educator_df, garden_df, school_df)
+
+    try:
+        execute_validations(config["validations"], data)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    
+    return data["educator_df"], data["garden_df"], data["school_df"], timeslots
+    
+def load_data(educator_data, garden_data, school_data):
     # Load the Excel files
-    educator_df = pd.read_excel(path_educator_data)
-    garden_df = pd.read_excel(path_garden_data)
-    school_df = pd.read_excel(path_school_data)
+    educator_df = pd.read_excel(educator_data)
+    garden_df = pd.read_excel(garden_data)
+    school_df = pd.read_excel(school_data)
     
     return educator_df, garden_df, school_df
 
-def run_data_validation(educator_data, garden_data, school_data):
-    timeslots = get_timeslots(educator_data)
-    school_data = transform_school_file(school_data, config) 
-    
-    # check whether tuinlocatie and locatie are the same always 
-    
-    
-    # validate_educator_file(educator_data, timeslots)
-    # validate_garden_file(garden_data)
+def run_transformation(educator_df, garden_df, school_df):    
+    col_mapping_educator = {k: v for d in config['etl']['educator']['col_mapping'] for k, v in d.items()}
+    col_mapping_school = {k: v for d in config['etl']['school']['col_mapping'] for k, v in d.items()}
+    col_mapping_garden = {k: v for d in config['etl']['garden']['col_mapping'] for k, v in d.items()}
 
-def get_timeslots(educator_data):
-    breakpoint()
-    return
+    educator_df.rename(columns=col_mapping_educator, inplace=True)
+    school_df.rename(columns=col_mapping_school, inplace=True)
+    garden_df.rename(columns=col_mapping_garden, inplace=True)
     
-def transform_school_file(school_df, config):
+    timeslots = get_timeslots(educator_df, excluded_cols_timeslots=['garden_name', 'medewerker'])
+    
+    school_df = transform_school_file(school_df)
+    educator_df = transform_educator_file(educator_df)
+    garden_df = transform_garden_file(garden_df)
+
+    school_df = clean_primary_keys(school_df, primary_keys=config['etl']['school']['primary_keys'])
+    educator_df = clean_primary_keys(educator_df, primary_keys=config['etl']['educator']['primary_keys'])
+    garden_df = clean_primary_keys(garden_df, primary_keys=config['etl']['garden']['primary_keys'])
+
+    output_data = {
+        'educator_df': educator_df,
+        'garden_df': garden_df,
+        'school_df': school_df,
+    }
+    
+    return output_data, timeslots
+
+def clean_primary_keys(df: pd.DataFrame, primary_keys: list[str]) -> pd.DataFrame:
     """
-    transform a school DataFrame by identifying and handling duplicate rows based on specific columns ('col1' and 'col2').
-
-    Parameters:
-        df (pd.DataFrame): The input DataFrame with a 'periodeid' column.
-
-    Returns:
-        pd.DataFrame: A DataFrame with duplicates handled.
-        list: A list of timeslots or duplicate information.
+    Clean the primary keys in a dataframe.
     """
-    # Put these in the config: 
-    col_names_to_check_duplicates = ['schoolcode', 'naam', 'groep']
-    col_names_timeslots = ['vrijveld2', 'vrijveld3', 'vrijveld4', 'vrijveld5', 'vrijveld6']
+    for key in primary_keys:
+        df = df[pd.notna(df[key])]
+    return df
+
+
+def get_timeslots(educator_data, excluded_cols_timeslots):
+    timeslots = [col for col in educator_data.columns if col not in excluded_cols_timeslots]
+    return timeslots
     
-    # Step 1: find and remove any duplicate rows
-    school_df = find_and_remove_duplicates(school_df, col_names_to_check_duplicates=col_names_to_check_duplicates) 
+def transform_school_file(school_df: pd.DataFrame):
+    """
+    Transform school DataFrame 
+    1. Transform time string to standard format
+    2. Add a specific group id column
+    """
+    col_names_timeslots = config['etl']['school']['col_names_timeslots']
     
-    # Step 2: change the timeslot strings to a standard format
+    # Step 1: change the timeslot strings to a standard format
     for column in col_names_timeslots:
         school_df[column] = school_df[column].apply(standardize_time_string)
     
-    # # Create a list of all distinct timeslots found in the school data
-    # timeslots = pd.unique(school_df[col_names_timeslots].values.ravel())
-
+    # Step 2: Add 'group_id' column
+    school_df['group_id'] = str(school_df['period_id']) + '_' + str(school_df['school_code'])
+    
     return school_df
-
-def validate_school_file(school_data):
-    return
-
-def validate_educator_file(educator_data: pd.DataFrame, timeslots):
-
-    
-        
-    return
-
-def validate_garden_file(garden_data: pd.DataFrame, timeslots):    
-    return
-
-def find_and_remove_duplicates(school_df, col_names_to_check_duplicates=None):
-    """ 
-    Check for and remove any duplicate rows in the school data.
-    
-    Return: deduplicated dataframe
-    """
-    # Check for duplicates based on column names
-    duplicate_mask = school_df.duplicated(subset=col_names_to_check_duplicates, keep=False)
-    duplicates = school_df[duplicate_mask]
-
-    if not duplicates.empty:
-        print("Duplicates detected:")  # TODO: Raise a warning here
-        print(duplicates)
-
-    # Ensure 'periodeid' column is treated as strings
-    school_df['periodeid'] = school_df['periodeid'].astype(str)
-    school_df['periodeid_length'] = school_df['periodeid'].str.len()
-
-    # Sort by the specified columns and 'periodeid_length'
-    df_sorted = school_df.sort_values(by=col_names_to_check_duplicates + ['periodeid_length'])
-
-    # Drop duplicates, keeping the first occurrence (shortest 'periodeid')
-    df_deduplicated = df_sorted.drop_duplicates(subset=col_names_to_check_duplicates, keep='first')
-    
-    # Identify and log removed duplicates
-    removed_duplicates = duplicates[~duplicates.index.isin(df_deduplicated.index)]
-    if not removed_duplicates.empty:
-        print("Removed duplicates:")  # TODO: Print what duplicates were deleted if there were duplicates
-        print(removed_duplicates)
-
-    # Clean up the temporary column
-    df_deduplicated = df_deduplicated.drop(columns=['periodeid_length'])
-    df_deduplicated = df_deduplicated.reset_index(drop=True)
-    
-    return df_deduplicated
 
 def standardize_time_string(s: str) -> str:
     """
@@ -183,4 +153,25 @@ def standardize_time_string(s: str) -> str:
     s = s.strip()
  
     return s 
-run_extract_transform_load(config)
+
+def transform_educator_file(educator_df):
+    return educator_df
+    
+def transform_garden_file(garden_df):    
+    return garden_df
+
+def execute_validations(validation_config, data):
+    exceptions = []
+    for validation_name, validation_args in validation_config.items():
+        validation_func = getattr(dv, validation_name)
+        args = [data[arg_value] if 'df' in arg_key else arg_value for arg_key, arg_value in validation_args.items()]
+        failure, message = validation_func(*args)
+        if failure:
+            table_names = [arg_value for arg_key, arg_value in validation_args.items() if 'df' in arg_key]
+            exceptions.append(ValidationException(message, table_names))
+    if exceptions:
+        for e in exceptions:
+            print(f"Validation failed for {e.input_name}: {e}")
+        raise Exception("Validations failed")
+
+    
