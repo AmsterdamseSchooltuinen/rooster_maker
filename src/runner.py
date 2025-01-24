@@ -118,15 +118,55 @@ def run_program(
                                                solved, 
                                                current_educator_data)
         all_summary_stats[garden_name] = summary_stats
-        output = format_output(solver_result, current_garden)
+        output = format_output(current_garden, solver_result)
     return all_summary_stats, output
 
 
-def format_output(solved_info: cp_model.CpSolver, garden: Garden):
-    # TODO: fill this function with Thomas' code! It returns the information per garden.
-    # df_excel = create_excel_output(output_data=x, unassigned_data=y)
-    # return df_excel
-    return pd.DataFrame()
+def format_output(garden: Garden, solver: cp_model.CpSolver):
+    teachers = list(garden.teacher_availability.keys())
+    groups = garden.groups
+    time_slots = garden.time_slots
+    tuinlocatie = garden.name
+    assigned_groups = []
+    # Dictionary for output assigned schools
+    output_data = {"Tuinlocatie": [tuinlocatie] + [""] * (len(time_slots) - 1), "Tijdslot": time_slots}
+    for teacher in teachers:
+        inschrijfcode_list = []
+        schoolname_list = []
+        transport_list = []
+        for time_slot in time_slots:
+            group_assigned = ""
+            for group in groups:
+                #check if this works
+                if solver.Value(assignment[(group, time_slot, teacher)]) == 1:
+                    group_assigned = group
+                    assigned_groups.append(group)
+                    break
+            inschrijfcode_list.append(group_assigned)
+            if group_assigned:
+                #find schoolname and transportation based on periodeid
+                schoolname_list.append("")
+                transport_list.append("")
+            else:
+                schoolname_list.append("")
+                transport_list.append("")
+        output_data[f"{teacher}"] = inschrijfcode_list
+        output_data[f"Schoolnaam_{teacher}"] = schoolname_list
+        output_data[f"Vervoer_{teacher}"] = transport_list
+    # Convert the dictionary to a df
+    df_assigned = pd.DataFrame(output_data)
+    # DataFrame for unassigned groups
+    df_unassigned = pd.DataFrame(columns=['Inschrijfcode', 'Schoolnaam', 'Vervoer'])
+    unassigned_groups = list(set(groups) - set(assigned_groups))
+    for group in unassigned_groups:
+        #find schoolname and transportation based on periodeid
+        schoolname = ""
+        transportation = ""
+        # Create a new DataFrame row and concatenate correctly
+        new_row = pd.DataFrame([[group, schoolname, transportation]],
+                               columns=['Inschrijfcode', 'Schoolnaam', 'Vervoer'])
+        df_unassigned = pd.concat([df_unassigned, new_row], ignore_index=True)
+    return df_assigned, df_unassigned
 
 
 def get_summary_statistics(solved_info: cp_model.CpSolver,
@@ -173,6 +213,7 @@ def get_summary_statistics(solved_info: cp_model.CpSolver,
 
     # If there was no feasible solution found, store information about that
     else:
+        # TODO: change this text to being in Dutch!
         summary = ("The scheduling problem could not be solved for this garden with the current "
                 "input data and the current constraints. Please review the data and constraints and run again.")
 
