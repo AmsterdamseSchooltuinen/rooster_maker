@@ -119,8 +119,8 @@ def run_program(
         all_summary_stats[garden_name] = summary_stats
         output = format_output(solver_result, current_garden)
 
-    all_summary_stats["alle_tuintjes_samen"] = combine_garden_stats(all_summary_stats)
-    print(all_summary_stats["alle_tuintjes_samen"])
+    all_summary_stats["Alle Tuinen Overzicht"] = combine_garden_stats(all_summary_stats)
+    print(all_summary_stats["Alle Tuinen Overzicht"])
     return all_summary_stats, output
 
 
@@ -215,10 +215,10 @@ def combine_garden_stats(all_summary_stats: dict) -> dict:
     }
 
     for garden in all_gardens:
-        combined_stats["assigned_groups"].append(
+        combined_stats["assigned_groups"].extend(
             all_summary_stats[garden]["assigned_groups"]
         )
-        combined_stats["unassigned_groups"].append(
+        combined_stats["unassigned_groups"].extend(
             all_summary_stats[garden]["unassigned_groups"]
         )
         combined_stats["assigned_students"] += all_summary_stats[garden][
@@ -228,7 +228,7 @@ def combine_garden_stats(all_summary_stats: dict) -> dict:
             "unassigned_students"
         ]
         combined_stats["schedule"] = pd.concat(
-            [combined_stats["schedule"], all_summary_stats[garden]["schedule"]], axis=1
+            [combined_stats["schedule"], all_summary_stats[garden]["schedule"]]
         )
         combined_stats["current_educator_data"] = pd.concat(
             [
@@ -241,6 +241,6 @@ def combine_garden_stats(all_summary_stats: dict) -> dict:
             "available_plots"
         ]
         combined_stats["reserved_plots"] += all_summary_stats[garden]["reserved_plots"]
-        combined_stats["teachers"].append(all_summary_stats[garden]["teachers"])
+        combined_stats["teachers"].extend(all_summary_stats[garden]["teachers"])
 
     return combined_stats

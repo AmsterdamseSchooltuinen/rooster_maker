@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 from io import BytesIO
+import os
 
 from src.configs.get_config import get_config
 from src.extract_transform_load import run_extract_transform_load
@@ -21,41 +22,57 @@ def main():
     garden_label = config["labels"]["garden_label"]
     run_label = config["labels"]["run_label"]
     finished_run_label = config["labels"]['finished_run_label']
+    educators_template_name = config["template_file_names"]["educators_template"]
+    school_template_name = config["template_file_names"]["school_template"]
+    garden_template_name = config["template_file_names"]["garden_template"]
     
     st.title(title_label)
     st.subheader(subheader_label)
     inputs_needed = True
 
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    educators_template_path = os.path.join(current_dir, "data", educators_template_name)
+    school_template_path = os.path.join(current_dir, "data", school_template_name)
+    garden_template_path = os.path.join(current_dir, "data", garden_template_name)
+    
+    st.divider()
+    
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col1:
+        st.download_button(
+            label="Download beschikbaarheid groepen",
+            data=open(educators_template_path, "rb").read(),
+            file_name="educators_template.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )        
+    with col2:
+        st.download_button(
+        label="Download beschikbaarheid groepen template",
+        data=open(school_template_path, "rb").read(),
+        file_name="school_template.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+    with col3:
+        st.download_button(
+            label="Download schooltuinen informatie template",
+            data=open(garden_template_path, "rb").read(),
+            file_name="garden_template.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+    
+    st.divider()
+    
     educators_bytes = st.file_uploader(educators_label, type = "xlsx")
     school_bytes = st.file_uploader(school_label, type = "xlsx")
     garden_bytes = st.file_uploader(garden_label, type = "xlsx")
 
-    # Paths to template files from the config
-    educators_template_path = config["templates"]["educators_template"]
-    school_template_path = config["templates"]["school_template"]
-    garden_template_path = config["templates"]["garden_template"]
 
+            
     # Create buttons to download templates
-    st.download_button(
-        label="Download Educators Template",
-        data=open(educators_template_path, "rb").read(),
-        file_name="educators_template.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
 
-    st.download_button(
-        label="Download School Template",
-        data=open(school_template_path, "rb").read(),
-        file_name="school_template.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
 
-    st.download_button(
-        label="Download Garden Template",
-        data=open(garden_template_path, "rb").read(),
-        file_name="garden_template.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+
+
 
 
     inputs_needed = not (educators_bytes and school_bytes and garden_bytes)

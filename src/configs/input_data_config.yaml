@@ -116,6 +116,6 @@ validations:
       df_1: garden_df
       df_2: school_df
 template_file_names:
-  - "educators_template": "educators_template.xlsx"
-  - "school_template": "school_template.xlsx"
-  - "garden_template": "garden_template.xlsx"
+  "educators_template": "Template educators.xlsx"
+  "school_template": "PLACEHOLDER Template schools.xlsx"
+  "garden_template": "Template school garden.xlsx"
