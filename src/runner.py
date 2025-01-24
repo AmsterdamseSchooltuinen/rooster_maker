@@ -81,7 +81,7 @@ def run_program(
                     groups_that_go_together_with_bus_per_school[row["school_id"]] = [
                         row["period_id"]
                     ]
-        display(groups_that_go_together_with_bus_per_school)
+        # display(groups_that_go_together_with_bus_per_school)
 
         current_garden = Garden(
             name=garden_name,
@@ -111,7 +111,6 @@ def run_program(
         # Solve the schedule problem
         solver_result, assignment, solved = solve_schedule_problem(current_garden)
 
-        display(current_educator_data)
         # Get the summary statistics and output
         summary_stats = get_summary_statistics(solver_result,
                                                current_garden,
@@ -119,6 +118,7 @@ def run_program(
                                                solved)
         all_summary_stats[garden_name] = summary_stats
         output = format_output(solver_result, current_garden)
+    breakpoint()    
     return all_summary_stats, output
 
 
