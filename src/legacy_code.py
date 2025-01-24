@@ -3,12 +3,22 @@ from ortools.sat.python import cp_model
 
 # Time slots
 time_slots = [
-    'maandag, 09.00 - 10.30', 'maandag, 10.45 - 12.15', 'maandag, 13.30 - 15.00',
-    'dinsdag, 09.00 - 10.30', 'dinsdag, 10.45 - 12.15', 'dinsdag, 13.30 - 15.00',
-    'woensdag, 09.00 - 10.30', 'woensdag, 10.45 - 12.15',
-    'donderdag, 09.00 - 10.30', 'donderdag, 10.45 - 12.15', 'donderdag, 13.30 - 15.00',
-    'vrijdag, 09.00 - 10.30', 'vrijdag, 10.45 - 12.15', 'vrijdag, 13.30 - 15.00'
+    "maandag, 09.00 - 10.30",
+    "maandag, 10.45 - 12.15",
+    "maandag, 13.30 - 15.00",
+    "dinsdag, 09.00 - 10.30",
+    "dinsdag, 10.45 - 12.15",
+    "dinsdag, 13.30 - 15.00",
+    "woensdag, 09.00 - 10.30",
+    "woensdag, 10.45 - 12.15",
+    "donderdag, 09.00 - 10.30",
+    "donderdag, 10.45 - 12.15",
+    "donderdag, 13.30 - 15.00",
+    "vrijdag, 09.00 - 10.30",
+    "vrijdag, 10.45 - 12.15",
+    "vrijdag, 13.30 - 15.00",
 ]
+
 
 # Import the garden constraints
 max_groups_per_slot = 2
@@ -21,9 +31,9 @@ n_groups = df.shape[0]
 # Read availability of schools
 availability_groups = {}
 for i in range(n_groups):
-    g_id = int(df['periodeid'].iloc[i])
+    g_id = int(df["periodeid"].iloc[i])
     availability_groups[g_id] = []
-    for col in ['vrijveld2', 'vrijveld3', 'vrijveld4', 'vrijveld5', 'vrijveld6']:
+    for col in ["vrijveld2", "vrijveld3", "vrijveld4", "vrijveld5", "vrijveld6"]:
         value = df[col].iloc[i]
         if pd.isna(value):
             break
@@ -33,8 +43,8 @@ for i in range(n_groups):
 # Read amount of students per class
 size_groups = {}
 for i in range(n_groups):
-    g_id = int(df['periodeid'].iloc[i])
-    number_of_students = int(df['leerlingen'].iloc[i])
+    g_id = int(df["periodeid"].iloc[i])
+    number_of_students = int(df["leerlingen"].iloc[i])
     size_groups[g_id] = [number_of_students]
 
 # Read teacher availability
@@ -44,7 +54,7 @@ for idx, row in teacher_df.iterrows():
     teacher_name = row["Medewerker"]
     teacher_availability[teacher_name] = {}
     for slot in time_slots:
-        cell_value = row[slot] if slot in row else 'U'  # default 'U' if missing
+        cell_value = row[slot] if slot in row else "U"  # default 'U' if missing
         teacher_availability[teacher_name][slot] = 1 if cell_value == "X" else 0
 
 # Build the model
@@ -71,9 +81,12 @@ for group in availability_groups.keys():
 
 # Max number of groups per time slot
 for slot in time_slots:
-    model.Add(sum(assignment[(group, slot)] for group in availability_groups) <= max_groups_per_slot)
+    model.Add(
+        sum(assignment[(group, slot)] for group in availability_groups)
+        <= max_groups_per_slot
+    )
 
-# A group can only be assigned to a slot if it's in their availability
+# A group can only be assigned t o a slot if it's in their availability
 for group, availability in availability_groups.items():
     for slot in time_slots:
         if slot not in availability:
@@ -81,9 +94,12 @@ for group, availability in availability_groups.items():
 
 # Total number of students must not exceed available plots
 model.Add(
-    sum(size_groups[group][0] * assignment[(group, slot)]
+    sum(
+        size_groups[group][0] * assignment[(group, slot)]
         for group in availability_groups.keys()
-        for slot in time_slots) <= aantal_tuintjes
+        for slot in time_slots
+    )
+    <= aantal_tuintjes
 )
 
 # Link group-slot assignment to teacher assignment:
@@ -91,7 +107,10 @@ model.Add(
 for group in availability_groups.keys():
     for slot in time_slots:
         model.Add(
-            sum(teacher_assignment[(group, t, slot)] for t in teacher_availability.keys())
+            sum(
+                teacher_assignment[(group, t, slot)]
+                for t in teacher_availability.keys()
+            )
             >= assignment[(group, slot)]
         )
 
@@ -100,7 +119,9 @@ for group in availability_groups.keys():
     for teacher in teacher_availability.keys():
         for slot in time_slots:
             # teacher assignment cannot exceed the group's assignment
-            model.Add(teacher_assignment[(group, teacher, slot)] <= assignment[(group, slot)])
+            model.Add(
+                teacher_assignment[(group, teacher, slot)] <= assignment[(group, slot)]
+            )
             # teacher assignment cannot exceed teacher availability
             if teacher_availability[teacher][slot] == 0:
                 model.Add(teacher_assignment[(group, teacher, slot)] == 0)
@@ -109,20 +130,38 @@ for group in availability_groups.keys():
 for teacher in teacher_availability.keys():
     for slot in time_slots:
         model.Add(
-            sum(teacher_assignment[(g, teacher, slot)] for g in availability_groups.keys()) <= 1
+            sum(
+                teacher_assignment[(g, teacher, slot)]
+                for g in availability_groups.keys()
+            )
+            <= 1
         )
 
 # Objective function
-a = .005
+a = 0.005
 model.Maximize(
-    sum(assignment[(group, slot)] for group in availability_groups for slot in time_slots)
-    + a * sum(
-        assignment[(group, slot)] *
-        (
-            10 if slot == availability_groups[group][0] else
-            5 if len(availability_groups[group]) > 1 and slot == availability_groups[group][1] else
-            2 if len(availability_groups[group]) > 2 and slot == availability_groups[group][2] else
-            0
+    sum(
+        assignment[(group, slot)]
+        for group in availability_groups
+        for slot in time_slots
+    )
+    + a
+    * sum(
+        assignment[(group, slot)]
+        * (
+            10
+            if slot == availability_groups[group][0]
+            else (
+                5
+                if len(availability_groups[group]) > 1
+                and slot == availability_groups[group][1]
+                else (
+                    2
+                    if len(availability_groups[group]) > 2
+                    and slot == availability_groups[group][2]
+                    else 0
+                )
+            )
         )
         for group in availability_groups
         for slot in time_slots
@@ -151,7 +190,10 @@ if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
             # Find assigned teacher(s)
             assigned_teachers = []
             for teacher in teacher_availability.keys():
-                if solver.Value(teacher_assignment[(group, teacher, assigned_slot)]) == 1:
+                if (
+                    solver.Value(teacher_assignment[(group, teacher, assigned_slot)])
+                    == 1
+                ):
                     assigned_teachers.append(teacher)
             print(
                 f"Group {group} -> Slot '{assigned_slot}' (Choice {choice_index}), "
