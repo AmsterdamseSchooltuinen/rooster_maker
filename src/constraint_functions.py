@@ -127,7 +127,7 @@ def max_buses_per_time_slot(
                 for group in garden.groups
                 for teacher in garden.teachers
             )
-            <= garden.max_buses_per_time_slot
+            <= garden.max_buses_per_time_slot * 2  # there fit 2 groups in a bus
         )
     return model
 

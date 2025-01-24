@@ -107,7 +107,7 @@ def check_key_cols(df: pd.DataFrame, key_cols: list[str], df_name: str) -> tuple
     """
     for col in key_cols:
         if col not in df.columns:
-            return True, f"{get_frontend_name(col, df_name, config)} not available in file. Heb je het juiste bestand geüpload?"
+            return True, f"column naam: {col}, {get_frontend_name(col, df_name, config)} not available in file. Heb je het juiste bestand geüpload?"
         if df[col].isnull().values.any():
             return True, f"Blank values found in key column {get_frontend_name(col, df_name, config)}"
     return False, "All good"

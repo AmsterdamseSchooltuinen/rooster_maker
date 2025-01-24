@@ -31,11 +31,11 @@ def run_extract_transform_load(
 
     data, timeslots = run_transformation(educator_df, garden_df, school_df)
 
-    # try:
-    #     execute_validations(config["validations"], data)
-    # except Exception as e:
-    #     print(f"An error occurred: {e}")
-    #     raise e
+    try:
+        execute_validations(config["validations"], data)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        raise e
     
     return data["educator_df"], data["garden_df"], data["school_df"], timeslots
 

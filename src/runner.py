@@ -181,6 +181,17 @@ def get_summary_statistics(
             "input data and the current constraints. Please review the data and constraints and run again."
         )
 
+    SHOW_LOGS = True
+    if SHOW_LOGS:
+        # display(schedule)
+        if len(unassigned_groups) > 0:
+            print("WARNING UNASSIGNED GROUPS")
+            for group in unassigned_groups:
+                print(f"{group} size:{ garden.group_sizes[group]}")
+            print()
+        print("available plots", garden.available_plots_with_reserve)
+        print("assigned students", assigned_students)
+        print("max buses per slot", garden.max_buses_per_time_slot)
     return summary
 
 
