@@ -115,10 +115,10 @@ def run_program(
         summary_stats = get_summary_statistics(solver_result,
                                                current_garden,
                                                assignment,
-                                               solved)
+                                               solved, 
+                                               current_educator_data)
         all_summary_stats[garden_name] = summary_stats
         output = format_output(solver_result, current_garden)
-    breakpoint()    
     return all_summary_stats, output
 
 
@@ -132,7 +132,8 @@ def format_output(solved_info: cp_model.CpSolver, garden: Garden):
 def get_summary_statistics(solved_info: cp_model.CpSolver,
                            garden: Garden,
                            assignment: dict,
-                           solved: bool):
+                           solved: bool,
+                           current_educator_data: pd.DataFrame):
 
     # If the garden has a feasible solution, create the summary_statistics dictionary
     if solved:
@@ -144,27 +145,35 @@ def get_summary_statistics(solved_info: cp_model.CpSolver,
         schedule = pd.DataFrame(index=garden.teachers, columns=garden.time_slots)
         schedule = schedule.fillna("")
 
-    for group in garden.groups:
-        for time in garden.time_slots:
-            for teacher in garden.teachers:
-                if solved_info.Value(assignment[(group, time, teacher)]) == 1:
-                    assigned_groups.append(group)
-                    schedule.at[teacher, time] = (
-                        f"{group} (size: {garden.group_sizes[group]}) (bus: {garden.group_uses_bus[group]})"
-                    )
-                    assigned_students += garden.group_sizes[group]
-                elif solved_info.Value(assignment[(group, time, teacher)]) == 0:
-                    unassigned_groups.append(group)
-                    unassigned_students += garden.group_sizes[group]
-        summary = {'assigned_groups': assigned_groups,
-                   'unassigned_groups': unassigned_groups,
-                   'assigned_students': assigned_students,
-                   'unassigned_students': unassigned_students,
-                   'schedule': schedule}
+        for group in garden.groups:
+            for time in garden.time_slots:
+                for teacher in garden.teachers:
+                    if solved_info.Value(assignment[(group, time, teacher)]) == 1:
+                        assigned_groups.append(group)
+                        schedule.at[teacher, time] = (
+                            f"{group} (size: {garden.group_sizes[group]}) (bus: {garden.group_uses_bus[group]})"
+                        )
+                        assigned_students += garden.group_sizes[group]
+
+                    
+        unassigned_groups = set(garden.groups) - set(assigned_groups)
+        for group in unassigned_groups:
+            unassigned_students += garden.group_sizes[group]
+        summary = {
+            "assigned_groups": assigned_groups,
+            "unassigned_groups": unassigned_groups,
+            "assigned_students": assigned_students,
+            "unassigned_students": unassigned_students,
+            "schedule": schedule,
+            "current_educator_data": current_educator_data,
+            "available_plots": garden.available_plots,
+            "reserved_plots": garden.reserved_plots,
+            "teachers": garden.teachers
+        }
 
     # If there was no feasible solution found, store information about that
     else:
         summary = ("The scheduling problem could not be solved for this garden with the current "
-                   "input data and the current constraints. Please review the data and constraints and run again.")
+                "input data and the current constraints. Please review the data and constraints and run again.")
 
     return summary

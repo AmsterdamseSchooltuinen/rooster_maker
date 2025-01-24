@@ -46,41 +46,10 @@ def main():
         try:
             educator_data, garden_data, school_data, timeslots = run_extract_transform_load(educators_bytes, garden_bytes, school_bytes)
             
-            # RUN EVERYTHING HERE
-            # TODO: update the output function because it doesn't work at the moment
             summary_statistics_dict, final_output_df = run_program(school_data=school_data,
                                                                    educator_data=educator_data,
                                                                    garden_data=garden_data,
                                                                    time_slots=timeslots)
-            # final_output_df = pd.DataFrame(['test',2,3])
-            # summary_statistics_dict = {'Kalff Schooltuin': {
-            #     'available_plots': 200,
-            #     'reserve_plots': 20,
-            #     'teachers': ['Nils', 'Floris'],
-            #     'assigned_students': 180,
-            #     'assigned_groups': 16,
-            #     'unassigned_groups': 0,
-            #     'unassigned_group_names': [],
-            #     'percentage_groups_first_choice': 70,
-            #     'percentage_groups_second_choice': 12,
-            #     'percentage_groups_third_choice': 8, 
-            #     'percentage_groups_later_choice': 7,
-            #     'percentage_groups_unallocated': 3
-            # }, 'Aemstel Schooltuin': {
-            # 'available_plots': 100,
-            # 'reserve_plots': 20,
-            # 'teachers': ['Jacob', 'Amelia'],
-            # 'assigned_students': 100,
-            # 'assigned_groups': 16,
-            # 'unassigned_groups': 2,
-            # 'unassigned_group_names': ['school a group a', 'school b group b'],
-            # 'percentage_groups_first_choice': 60,
-            # 'percentage_groups_second_choice': 22,
-            # 'percentage_groups_third_choice': 7, 
-            # 'percentage_groups_later_choice': 8,
-            # 'percentage_groups_unallocated': 3
-            # }, 'Ander tuintje': 'Optimalisatie is niet gelukt'
-            # }
             
             st.session_state.final_output_df = final_output_df
             st.session_state.summary_statistics_dict = summary_statistics_dict
@@ -119,28 +88,27 @@ def main():
             else:
                 st.subheader(f"Resultaten voor {schooltuin}")
 
-                for key in stats.keys():
-                    if key != 'unassigned_groups':
-                        st.write(f"**{key}:** {stats[key]}")
+                st.write(f"**Beschikare tuintjes:** {stats['available_plots']}")
+                st.write(f"**Reserve tuintjes:** {stats['reserved_plots']}")
+                st.write(f"**Medewerkers:** {', '.join(stats['teachers'])}")
+                st.write(f"**Aantal leerlingen ingedeeld:** {stats['assigned_students']}")
+                st.write(f"**Aantal leerlingen niet ingedeeld:** {stats['unassigned_students']}")
+                st.write(f"**Aantal groepen ingedeeld:** {len(stats['assigned_groups'])}")
                 
-                # st.write(f"**Beschikare tuintjes:** {stats['available_plots']}")
-                # st.write(f"**Reserve tuintjes:** {stats['reserve_plots']}")
-                # st.write(f"**Medewerkers:** {', '.join(stats['teachers'])}")
-                # st.write(f"**Aantal leerlingen ingedeeld:** {stats['assigned_students']}")
-                # st.write(f"**Aantal groepen ingedeeld:** {stats['assigned_groups']}")
                 if len(stats['unassigned_groups']) > 0:
                     st.markdown(
-                        f"<span style='color: red; font-weight: bold;'>Aantal groepen niet ingedeeld: {stats['unassigned_groups']}</span>",
+                        f"<span style='color: red; font-weight: bold;'>Aantal groepen niet ingedeeld: {len(stats['unassigned_groups'])}</span>",
                         unsafe_allow_html=True
                     )
-                    # st.markdown(
-                    #     f"<span style='color: red; font-weight: bold;'>Groepen die niet zijn ingedeeld: {', '.join(stats['unassigned_group_names'])}</span>",
-                    #     unsafe_allow_html=True
-                    # )
+                    st.markdown(
+                        f"<span style='color: red; font-weight: bold;'>Groepen die niet zijn ingedeeld: {', '.join(map(str, stats['unassigned_groups']))}</span>",
+                        unsafe_allow_html=True
+                    )
                 else:
                     st.write(f"**Aantal groepen niet ingedeeld:** {stats['unassigned_groups']}")
-                    st.write(f"**Groepen die niet zijn ingedeeld:** {', '.join(stats['unassigned_group_names'])}")
-          
+
+            st.table(data=stats['schedule'])
+            st.table(data=stats['current_educator_data'])
                 
     
     # # Streamlit app

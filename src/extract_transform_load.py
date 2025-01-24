@@ -82,7 +82,6 @@ def run_transformation(educator_df, garden_df, school_df):
         garden_df, primary_keys=config["etl"]["garden"]["primary_keys"]
     )
 
-
     output_data = {
         "educator_df": educator_df,
         "garden_df": garden_df,
