@@ -155,7 +155,7 @@ def main():
                         unsafe_allow_html=True
                     )
                 else:
-                    st.write(f"**Aantal groepen niet ingedeeld:** {stats['unassigned_groups']}")
+                    st.write(f"**Aantal groepen niet ingedeeld:** Iedereen ingedeeld ✅")
 
             st.table(data=stats['schedule'])
             st.table(data=stats['current_educator_data'])

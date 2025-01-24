@@ -195,9 +195,8 @@ def execute_validations(validation_config: list[dict], data: dict) -> list[Valid
     warnings = []
     for validation in validation_config:
         for validation_name, validation_args in validation.items():
-            print(validation_args)
-            is_optional = validation_args["optional"]
-            del validation_args["optional"]
+            is_optional = validation_args.get("optional", False)  # Default to False if 'optional' is not present
+            validation_args.pop('optional', None)
             validation_func = getattr(dv, validation_name)
             args = [data[arg_value] if 'df' in arg_key else arg_value for arg_key, arg_value in validation_args.items()]
             table: str = [arg_value for arg_key, arg_value in validation_args.items() if 'df' in arg_key][0]
