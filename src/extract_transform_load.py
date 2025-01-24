@@ -5,7 +5,11 @@ import pandas as pd
 
 import src.data_validations as dv
 from src.configs.get_config import get_config
-from src.data_validations import ValidationException, ValidationExceptionCollector
+from src.data_validations import (
+    ValidationException,
+    ValidationExceptionCollector,
+    ValidationWarning,
+)
 
 config = get_config("input_data_config")
 
@@ -27,29 +31,25 @@ def run_extract_transform_load(
     if not school_data:
         school_data = file_path_school_data
 
-    educator_df, garden_df, school_df = load_data(educator_data, garden_data, school_data)
+    educator_data, garden_data, school_data = load_data(educator_data, garden_data, school_data)
 
-    data, timeslots = run_transformation(educator_df, garden_df, school_df)
+    data, timeslots = run_transformation(educator_data, garden_data, school_data)
 
-    try:
-        execute_validations(config["validations"], data)
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        raise e
+    warnings = execute_validations(config["validations"], data)
     
-    return data["educator_df"], data["garden_df"], data["school_df"], timeslots
+    return data["educator_data"], data["garden_data"], data["school_data"], timeslots, warnings
 
 
 def load_data(educator_data, garden_data, school_data):
     # Load the Excel files
-    educator_df = pd.read_excel(educator_data)
-    garden_df = pd.read_excel(garden_data)
-    school_df = pd.read_excel(school_data)
+    educator_data = pd.read_excel(educator_data)
+    garden_data = pd.read_excel(garden_data)
+    school_data = pd.read_excel(school_data)
 
-    return educator_df, garden_df, school_df
+    return educator_data, garden_data, school_data
 
 
-def run_transformation(educator_df, garden_df, school_df):
+def run_transformation(educator_data, garden_data, school_data):
     col_mapping_educator = {
         k: v for d in config["etl"]["educator"]["col_mapping"] for k, v in d.items()
     }
@@ -60,32 +60,32 @@ def run_transformation(educator_df, garden_df, school_df):
         k: v for d in config["etl"]["garden"]["col_mapping"] for k, v in d.items()
     }
 
-    educator_df.rename(columns=col_mapping_educator, inplace=True)
-    school_df.rename(columns=col_mapping_school, inplace=True)
-    garden_df.rename(columns=col_mapping_garden, inplace=True)
+    educator_data.rename(columns=col_mapping_educator, inplace=True)
+    school_data.rename(columns=col_mapping_school, inplace=True)
+    garden_data.rename(columns=col_mapping_garden, inplace=True)
 
     timeslots = get_timeslots(
-        educator_df, excluded_cols_timeslots=["garden_name", "educator"]
+        educator_data, excluded_cols_timeslots=["garden_name", "educator"]
     )
 
-    school_df = transform_school_file(school_df)
-    educator_df = transform_educator_file(educator_df)
-    garden_df = transform_garden_file(garden_df)
+    school_data = transform_school_file(school_data)
+    educator_data = transform_educator_file(educator_data)
+    garden_data = transform_garden_file(garden_data)
 
-    school_df = clean_primary_keys(
-        school_df, primary_keys=config["etl"]["school"]["primary_keys"]
+    school_data = clean_primary_keys(
+        school_data, primary_keys=config["etl"]["school"]["primary_keys"]
     )
-    educator_df = clean_primary_keys(
-        educator_df, primary_keys=config["etl"]["educator"]["primary_keys"]
+    educator_data = clean_primary_keys(
+        educator_data, primary_keys=config["etl"]["educator"]["primary_keys"]
     )
-    garden_df = clean_primary_keys(
-        garden_df, primary_keys=config["etl"]["garden"]["primary_keys"]
+    garden_data = clean_primary_keys(
+        garden_data, primary_keys=config["etl"]["garden"]["primary_keys"]
     )
 
     output_data = {
-        "educator_df": educator_df,
-        "garden_df": garden_df,
-        "school_df": school_df,
+        "educator_data": educator_data,
+        "garden_data": garden_data,
+        "school_data": school_data,
     }
 
     return output_data, timeslots
@@ -108,7 +108,7 @@ def get_timeslots(educator_data, excluded_cols_timeslots):
     return timeslots
 
 
-def transform_school_file(school_df: pd.DataFrame):
+def transform_school_file(school_data: pd.DataFrame):
     """
     Transform school DataFrame
     1. Transform time string to standard format
@@ -118,14 +118,14 @@ def transform_school_file(school_df: pd.DataFrame):
 
     # Step 1: change the timeslot strings to a standard format
     for column in col_names_timeslots:
-        school_df[column] = school_df[column].apply(standardize_time_string)
+        school_data[column] = school_data[column].apply(standardize_time_string)
 
     # Step 2: Add 'group_id' column
-    school_df["group_id"] = (
-        str(school_df["period_id"]) + "_" + str(school_df["school_id"])
+    school_data["group_id"] = (
+        str(school_data["period_id"]) + "_" + str(school_data["school_id"])
     )
 
-    return school_df
+    return school_data
 
 
 def standardize_time_string(s: str) -> str:
@@ -182,18 +182,22 @@ def standardize_time_string(s: str) -> str:
     return s
 
 
-def transform_educator_file(educator_df):
-    return educator_df
+def transform_educator_file(educator_data):
+    return educator_data
 
 
-def transform_garden_file(garden_df):
-    return garden_df
+def transform_garden_file(garden_data):
+    return garden_data
 
 
-def execute_validations(validation_config: list[dict], data: dict):
+def execute_validations(validation_config: list[dict], data: dict) -> list[ValidationWarning] | None:
     exceptions = []
+    warnings = []
     for validation in validation_config:
         for validation_name, validation_args in validation.items():
+            print(validation_args)
+            is_optional = validation_args["optional"]
+            del validation_args["optional"]
             validation_func = getattr(dv, validation_name)
             args = [data[arg_value] if 'df' in arg_key else arg_value for arg_key, arg_value in validation_args.items()]
             table: str = [arg_value for arg_key, arg_value in validation_args.items() if 'df' in arg_key][0]
@@ -201,6 +205,10 @@ def execute_validations(validation_config: list[dict], data: dict):
             failure, message = validation_func(*args)
             if failure:
                 table_names = [arg_value for arg_key, arg_value in validation_args.items() if 'df' in arg_key]
-                exceptions.append(ValidationException(message, table_names))
+                if is_optional:
+                    warnings.append(ValidationWarning(message, table_names))
+                else: 
+                    exceptions.append(ValidationException(message, table_names))
     if exceptions:
         raise ValidationExceptionCollector(exceptions)
+    return warnings if warnings else None

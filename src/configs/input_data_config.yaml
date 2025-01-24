@@ -76,46 +76,67 @@ etl:
       - "Aantal reserve tuintjes": "reserved_plots"
 validations:
   # - test_validation:
-  #     df: school_df
+  #     optional: True
+  #     df: school_data
   #     key_cols: 
   #       - "period_id"
   #       - "school_id"
   #       - "garden_name"
   # - test_validation:
-  #     df: educator_df
+  #     optional: True
+  #     df: educator_data
   #     key_cols: 
   #       - "garden_name"
-  #       - "medewerker"
+  #       - "educator"
   # - test_validation:
-  #     df: garden_df
+  #     optional: True
+  #     df: garden_data
   #     key_cols: 
   #       - "garden_name"
+  - check_any_empty_cols:
+      optional: False
+      df: educator_data
   - check_duplicates:
-      df: school_df
+      optional: False
+      df: school_data
       col_names_to_check_duplicates: 
         - "school_id"
         - "name"
         - "group"
   - check_key_cols:
-      df: school_df
+      optional: False
+      df: school_data
       key_cols: 
         - "period_id"
         - "school_id"
         - "garden_name"
   - check_key_cols:
-      df: educator_df
+      optional: False
+      df: educator_data
       key_cols: 
         - "garden_name"
         - "educator"
   - check_key_cols:
-      df: garden_df
+      optional: False
+      df: garden_data
       key_cols: 
         - "garden_name"
   - confirm_key_exists_and_is_identical:
+      optional: False
       key_col: garden_name
-      df_1: garden_df
-      df_2: school_df
+      df_1: garden_data
+      df_2: school_data
+  - check_at_least_one_col_filled:
+      optional: True
+      df: school_data
+      cols:
+        - "preference_1"
+        - "preference_2"
+        - "preference_3"
+        - "preference_4"
+        - "preference_5" 
+      group_id_col: period_id
 template_file_names:
   "educators_template": "Template educators.xlsx"
   "school_template": "PLACEHOLDER Template schools.xlsx"
-  "garden_template": "Template school garden.xlsx"
+  "garden_template": "Template school garden.xlsx"      
