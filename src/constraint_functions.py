@@ -165,22 +165,14 @@ def bus_groups_of_same_school_go_together(
     for school, groups in garden.groups_that_go_together_with_bus_per_school.items():
         for time in garden.time_slots:
             if len(groups) <= (garden.max_buses_per_time_slot * 2):
-                model.AddBoolOr(
-                    [
-                        sum(
-                            availability[(group, time, teacher)]
-                            for group in groups
-                            for teacher in garden.teachers
-                        )
-                        == len(groups),
-                        sum(
-                            availability[(group, time, teacher)]
-                            for group in groups
-                            for teacher in garden.teachers
-                        )
-                        == 0,
-                    ]
+                b = model.NewBoolVar(f"bus_{school}_{time}")
+                sum_assigned_groups = sum(
+                    availability[(group, time, teacher)]
+                    for group in groups
+                    for teacher in garden.teachers
                 )
+                model.Add(sum_assigned_groups == len(groups)).OnlyEnforceIf(b)
+                model.Add(sum_assigned_groups == 0).OnlyEnforceIf(b.Not())
 
     return model
 
