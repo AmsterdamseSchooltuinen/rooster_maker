@@ -30,6 +30,33 @@ def main():
     school_bytes = st.file_uploader(school_label, type = "xlsx")
     garden_bytes = st.file_uploader(garden_label, type = "xlsx")
 
+    # Paths to template files from the config
+    educators_template_path = config["templates"]["educators_template"]
+    school_template_path = config["templates"]["school_template"]
+    garden_template_path = config["templates"]["garden_template"]
+
+    # Create buttons to download templates
+    st.download_button(
+        label="Download Educators Template",
+        data=open(educators_template_path, "rb").read(),
+        file_name="educators_template.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+    st.download_button(
+        label="Download School Template",
+        data=open(school_template_path, "rb").read(),
+        file_name="school_template.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+    st.download_button(
+        label="Download Garden Template",
+        data=open(garden_template_path, "rb").read(),
+        file_name="garden_template.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
 
     inputs_needed = not (educators_bytes and school_bytes and garden_bytes)
 

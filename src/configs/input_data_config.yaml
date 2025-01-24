@@ -106,7 +106,7 @@ validations:
       df: educator_df
       key_cols: 
         - "garden_name"
-        - "medewerker"
+        - "educator"
   - check_key_cols:
       df: garden_df
       key_cols: 
@@ -115,3 +115,7 @@ validations:
       key_col: garden_name
       df_1: garden_df
       df_2: school_df
+template_file_names:
+  - "educators_template": "educators_template.xlsx"
+  - "school_template": "school_template.xlsx"
+  - "garden_template": "garden_template.xlsx"
