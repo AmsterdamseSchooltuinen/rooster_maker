@@ -7,11 +7,23 @@ config = get_config("input_data_config")
 class ValidationException(Exception):
     def __init__(self, message, input_name):
         super().__init__(message)
+        self.message = message
         self.input_name = input_name
+    
+    def __str__(self):
+        return f"{self.input_name}: {self.message}"
     
 class ValidationExceptionCollector(Exception):
     def __init__(self, exceptions: list[ValidationException]):
         self.exceptions = exceptions
+
+class ValidationWarning:
+    def __init__(self, message, input_name):
+        self.message = message
+        self.input_name = input_name
+        
+    def __str__(self):
+        return f"{self.input_name}: {self.message}"
 
 
 def flatten_dicts(dicts: list[dict]) -> dict:
@@ -36,11 +48,11 @@ def get_frontend_name(new_name, table_name, config):
     Returns:
         str: The original column name, or None if not found.
     """
-    if table_name == "educator_df":
+    if table_name == "educator_data":
         mapping = config["etl"]["educator"]["col_mapping"]
-    elif table_name == "school_df":
+    elif table_name == "school_data":
         mapping = config["etl"]["school"]["col_mapping"]
-    elif table_name == "garden_df":
+    elif table_name == "garden_data":
         mapping = config["etl"]["garden"]["col_mapping"]
     else:
         raise ValueError("Invalid table name")
@@ -110,6 +122,39 @@ def check_key_cols(df: pd.DataFrame, key_cols: list[str], df_name: str) -> tuple
             return True, f"{get_frontend_name(col, df_name, config)} not available in file. Heb je het juiste bestand geüpload?"
         if df[col].isnull().values.any():
             return True, f"Blank values found in key column {get_frontend_name(col, df_name, config)}"
+    return False, "All good"
+
+def check_any_empty_cols(df: pd.DataFrame, df_name: str) -> tuple[bool, str]:
+    """
+    Check if the key columns exist and are there any blank values.
+    
+    Parameters:
+        df (pd.DataFrame): The DataFrame to check.
+        
+    Returns:
+        bool: True if there are blank values, False otherwise.
+    """
+    cols = df.columns
+    for col in cols:
+        if df[col].isnull().values.any():
+            return True, f"Blank values found in '{get_frontend_name(col, df_name, config)}'"
+    return False, "All good"
+
+def check_at_least_one_col_filled(df: pd.DataFrame, cols: list[str], group_id_col: str, df_name: str) -> tuple[bool, str]:
+    """
+    Check if at least one of the columns is filled per row.
+    
+    Parameters:
+        df (pd.DataFrame): The DataFrame to check.
+        cols (list[str]): The columns to check.
+        group_id_col (str): The group id column.
+    Returns:
+        bool: True if all columns are empty, False otherwise.
+    """
+    empty_rows = df[cols].isnull().all(axis=1)
+    group_ids = df.loc[empty_rows, group_id_col].tolist()
+    if empty_rows.any():
+        return True, f"Groep(en): {group_ids} heeft geen voorkeurstijden opgegeven"
     return False, "All good"
 
 def test_validation(df: pd.DataFrame, cols: list[str], df_name: str) -> tuple[bool, str]:

@@ -44,8 +44,12 @@ def main():
     if run or run_override:
         st.session_state.run_clicked = True        
         try:
-            educator_data, garden_data, school_data, timeslots = run_extract_transform_load(educators_bytes, garden_bytes, school_bytes)
-            
+            educator_data, garden_data, school_data, timeslots, warnings = run_extract_transform_load(educators_bytes, garden_bytes, school_bytes)
+            if warnings:
+                st.header("⚠️ Mogelijk is er een probleem", divider="orange")
+                for warning in warnings:
+                    with st.warning("Mischien een problem?"):
+                        st.markdown(f"**{warning}**")
             # RUN EVERYTHING HERE
             # TODO: update the output function because it doesn't work at the moment
             summary_statistics_dict, final_output_df = run_program(school_data=school_data,
