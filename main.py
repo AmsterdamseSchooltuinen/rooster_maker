@@ -16,6 +16,7 @@ def main_test():
 def main():
     config = get_config("input_data_config")
     title_label = config["labels"]["title_label"]
+    sub_title = config["labels"]["sub_title"]
     subheader_label = config["labels"]["subheader_label"]
     educators_label = config["labels"]["educators_label"]
     school_label = config["labels"]["school_label"]
@@ -25,8 +26,22 @@ def main():
     educators_template_name = config["template_file_names"]["educators_template"]
     school_template_name = config["template_file_names"]["school_template"]
     garden_template_name = config["template_file_names"]["garden_template"]
+
+
+    css_styles = config['Styles']['css']
+    st.markdown(f"<style>{css_styles}</style>", unsafe_allow_html=True)
     
-    st.title(title_label)
+
+    #Title
+    st.markdown(f"<div class='header'>{title_label}</div>", unsafe_allow_html=True)
+
+    st.write("<br><br>", unsafe_allow_html=True)
+
+    #Sub Title 
+    st.markdown(f"<div class='subheader'>{sub_title}</div>", unsafe_allow_html=True)
+
+    st.write("<br><br>", unsafe_allow_html=True)
+
     st.subheader(subheader_label)
     inputs_needed = True
 

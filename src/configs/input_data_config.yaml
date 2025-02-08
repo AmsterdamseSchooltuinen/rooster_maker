@@ -1,8 +1,9 @@
 labels:
-  title_label: "Schooltuinen Amsterdam Roosterplanner"
+  title_label: "Schooltuinen Amsterdam Roostermaker"
+  sub_title: Amsterdamse Schooltuinen X ADC - Collective Week 2025
   # subheader_label: "*** Uitleg voor gebruik ***"
   subheader_label: |
-      Amsterdamse Schooltuinen X ADC - Collective Week 2025
+      
       **Gebruiksaanwijzing programma:** 
 
       **Stap 1.** Upload drie bestanden:  
@@ -140,3 +141,25 @@ template_file_names:
   "educators_template": "Template educators.xlsx"
   "school_template": "PLACEHOLDER Template schools.xlsx"
   "garden_template": "Template school garden.xlsx"      
+Styles:
+ css: |
+    .header {
+          font-size: 60px;
+          font-weight: bold;
+          text-align: center;
+          width: 100%;
+          padding: 10;  
+          display: flex;
+          justify-content: center;  
+          white-space: nowrap;      
+          }
+          .subheader {
+          font-size: 28px;
+          color: #666;
+          text-align: center;
+          width: 100%;
+          padding: 10;  
+          display: flex;
+          justify-content: center;  
+          white-space: nowrap;
+          }
