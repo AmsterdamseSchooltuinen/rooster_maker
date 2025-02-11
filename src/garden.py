@@ -28,6 +28,7 @@ class Garden:
     def __post_init__(self):
         self.available_plots = self.available_plots_with_reserve - self.reserved_plots
         self._set_constraints()
+        self.objective = get_config("objective_config")
 
     def _set_constraints(self, front_end_constraints: Optional[dict] = None) -> None:
         """Set the constraints for the garden."""
@@ -43,3 +44,4 @@ class Garden:
             included_constraints.update(front_end_constraints)
 
         self.constraints = included_constraints
+        
