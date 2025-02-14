@@ -1,23 +1,34 @@
 labels:
   title_label: "Schooltuinen Amsterdam Roostermaker"
   sub_title: Amsterdamse Schooltuinen X ADC - Collective Week 2025
+  instructions: "Gebruiksaanwijzing programma"
   # subheader_label: "*** Uitleg voor gebruik ***"
-  subheader_label: |
-      
-      **Gebruiksaanwijzing programma:** 
+  Beschikbaarheid_educatief_medewerkers: |
+      Beschikbaarheid educatief medewerkers
 
-      **Stap 1.** Upload drie bestanden:  
-        - **A. Beschikbaarheid medewerkers:** De beschikbaarheid van alle medewerkers op alle mogelijke uren voor specifieke tuinen. Een 'N' betekent dat de leraar niet beschikbaar is, een 'B' betekent dat de leraar beschikbaar is.  
-        - **B. Beschikbaarheid groepen:** De beschikbaarheid van alle groepen voor specifieke tuinen. De data komt uit de ingevulde forms met daarin de voorkeuren voor tijden en dagen.
-        - **C. Schooltuinen informatie:** In dit bestand is alle informatie over de beschikbare tuinen te vinden. Bijvoorbeeld het maximale aantal groepen, bussen en reservetuintjes. 
+  Beschikbaarheid_educatief_medewerkers_tekst: |
+    Dit bestand bevat de beschikbaarheid van alle educatief medewerkers voor alle mogelijke lesmomenten en tuinen. De volgende codes kunnen per lesmoment worden ingevuld:
+    <br><br>
 
-      **Stap 2.** Klik op '_Draai Programma_' en wacht tot de '_Klaar met optimalisatie_' tekst en de resultaten verschijnen. De resultaten laten informatie over de optimilisatie zien, zoals bijvoorbeeld hoeveel groepen niet zijn ingedeeld per tuin.
+    * Een <strong><span style="color: #2682FF;">B</span></strong> betekent dat de educatief medewerker <strong><span style="color: #2682FF;">beschikbaar</span></strong> is.  
+    * Een <strong><span style="color: #2682FF;">N</span></strong> betekent dat de educatief medewerkers <strong><span style="color: #2682FF;">niet beschikbaar</span></strong> is.  
+    * Een <strong><span style="color: #2682FF;">O</span></strong> betekent dat de educatief medewerkers <strong><span style="color: #2682FF;">onderhoud</span></strong> heeft.  
+    * Een <strong><span style="color: #2682FF;">V</span></strong> betekent dat de educatief medewerker <strong><span style="color: #2682FF;">voorwaardelijk beschikbaar</span></strong> is.<br>  
+    Wanneer meerdere lesmomenten met een <strong><span style="color: #2682FF;">V</span></strong> zijn ingevuld, wordt de educatief medewerker op een van die lesmomenten niet ingeroosterd. De overige lesmomenten met een <strong><span style="color: #2682FF;">V</span></strong> blijven beschikbaar voor eventuele indeling.
 
-      **Stap 3.** Download geoptimaliseerd rooster door op '_Download Resultaten_' te klikken.
+  Beschikbaarheid_groepen: |
+      Beschikbaarheid groepen
+  Beschikbaarheid_groepen_tekst: 
+    Dit bestand bevat de beschikbaarheid van alle groepen voor specifieke tuinen. De data komt uit de ingevulde forms met daarin de voorkeuren voor lesmomenten en dagen.
+  Schooltuinen_informatie: Schooltuinen informatie
+  Schooltuinen_informatie_tekst: Dit bestand bevat alle informatie over de tuinen, zoals het maximale aantal groepen en bussen per lesmoment en het aantal reservetuintjes. 
+  Upload_files: "Upload bestanden"
+  stap_2: "**Stap 2.** Klik op '_Draai Programma_' en wacht tot de '_Klaar met optimalisatie_' tekst en de resultaten verschijnen. De resultaten laten informatie over de optimilisatie zien, zoals bijvoorbeeld hoeveel groepen niet zijn ingedeeld per tuin."
+  stap_3: "**Stap 3.** Download geoptimaliseerd rooster door op '_Download Resultaten_' te klikken."
   educators_label: "Beschikbaarheid medewerkers"
   school_label: "Beschikbaarheid groepen"
   garden_label: "Schooltuinen informatie"
-  run_label: "Draai programma"
+  run_label: "Maak rooster"
   finished_run_label: "Klaar met optimalisatie!"
 test:
   test_sub: 1
@@ -151,15 +162,52 @@ Styles:
           padding: 10;  
           display: flex;
           justify-content: center;  
-          white-space: nowrap;      
+          white-space: nowrap;  
+          color: #17254F;    
           }
           .subheader {
           font-size: 28px;
           color: #666;
-          text-align: center;
-          width: 100%;
-          padding: 10;  
-          display: flex;
-          justify-content: center;  
+          #text-align: center;
+          width: auto;
+          padding: 10;   
           white-space: nowrap;
+          color: #5C6169; 
           }
+          .title {
+    font-size: 30px; /* Kleinere tekst */
+    #text-align: left; /* Links uitlijnen */
+    width: auto; /* Past zich aan de tekst aan */
+    padding: 0px;  
+    display: block; /* Geen flex nodig */
+    white-space: normal; /* Regels kunnen afbreken indien nodig */
+    color: #17254F
+        }
+        .subtitle {
+        font-size: 24px; /* Kleinere tekst */
+        font-weight: 600;
+    #text-align: left; /* Links uitlijnen */
+    width: auto; /* Past zich aan de tekst aan */
+    padding: 0px;  
+    display: block; /* Geen flex nodig */
+    white-space: normal; /* Regels kunnen afbreken indien nodig */
+    color: #17254F
+    }
+        .text {
+        font-size: 18px; /* Kleinere tekst */
+    #text-align: left; /* Links uitlijnen */
+    width: auto; /* Past zich aan de tekst aan */
+    padding: 0px;  
+    display: block; /* Geen flex nodig */
+    white-space: normal; /* Regels kunnen afbreken indien nodig */
+    color: #5C6169; 
+      }
+          .text_red {
+        font-size: 18px; /* Kleinere tekst */
+    #text-align: left; /* Links uitlijnen */
+    width: auto; /* Past zich aan de tekst aan */
+    padding: 0px;  
+    display: block; /* Geen flex nodig */
+    white-space: normal; /* Regels kunnen afbreken indien nodig */
+    color: #E32636; 
+      }
