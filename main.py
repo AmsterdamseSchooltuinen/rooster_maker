@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from io import BytesIO
 import os
+import io
 
 from src.configs.get_config import get_config
 from src.extract_transform_load import run_extract_transform_load
@@ -16,7 +17,14 @@ def main_test():
 def main():
     config = get_config("input_data_config")
     title_label = config["labels"]["title_label"]
-    subheader_label = config["labels"]["subheader_label"]
+    sub_title = config["labels"]["sub_title"]
+    instructions = config["labels"]["instructions"]
+    Beschikbaarheid_educatief_medewerkers = config["labels"]["Beschikbaarheid_educatief_medewerkers"]
+    Beschikbaarheid_educatief_medewerkers_tekst = config["labels"]["Beschikbaarheid_educatief_medewerkers_tekst"]
+    Beschikbaarheid_groepen = config["labels"]["Beschikbaarheid_groepen"]
+    Beschikbaarheid_groepen_tekst = config["labels"]["Beschikbaarheid_groepen_tekst"]
+    Schooltuinen_informatie = config["labels"]["Schooltuinen_informatie"]
+    Schooltuinen_informatie_tekst = config["labels"]["Schooltuinen_informatie_tekst"]
     educators_label = config["labels"]["educators_label"]
     school_label = config["labels"]["school_label"]
     garden_label = config["labels"]["garden_label"]
@@ -25,67 +33,120 @@ def main():
     educators_template_name = config["template_file_names"]["educators_template"]
     school_template_name = config["template_file_names"]["school_template"]
     garden_template_name = config["template_file_names"]["garden_template"]
-    
-    st.title(title_label)
-    st.subheader(subheader_label)
-    inputs_needed = True
+    Upload_files = config["labels"]["Upload_files"]
 
+
+    css_styles = config['Styles']['css']
+    st.markdown(f"<style>{css_styles}</style>", unsafe_allow_html=True)
+    
+
+    #Title
+    st.markdown(f"<div class='header'>{title_label}</div>", unsafe_allow_html=True)
+
+    #Sub Title 
+    st.markdown(f"<div class='subheader'>{sub_title}</div>", unsafe_allow_html=True)
+
+    st.write("<br><br>", unsafe_allow_html=True)
+
+    st.markdown(f"<div class='title'>{instructions}</div>", unsafe_allow_html=True)
+
+    st.write("<br>", unsafe_allow_html=True)
+
+    st.markdown(f"<div class='subtitle'>{Beschikbaarheid_educatief_medewerkers}</div>", unsafe_allow_html=True)
+
+    st.markdown(f"<div class='text'>{Beschikbaarheid_educatief_medewerkers_tekst}</div>", unsafe_allow_html=True)
+
+    st.write("<br>", unsafe_allow_html=True)
+
+    inputs_needed = True
+    
     current_dir = os.path.dirname(os.path.abspath(__file__))
     educators_template_path = os.path.join(current_dir, "data", educators_template_name)
     school_template_path = os.path.join(current_dir, "data", school_template_name)
     garden_template_path = os.path.join(current_dir, "data", garden_template_name)
-    
-    st.divider()
-    
+
+
+
+    st.download_button(
+    label="Download template beschikbaarheid educatief medewerkers",
+    data=open(educators_template_path, "rb").read(),
+    file_name="Template_beschikbaarheid_medewerkers.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    use_container_width=True  # Makes the button as wide as the text
+    )
+
+    st.write("<br>", unsafe_allow_html=True)
+
+    st.markdown(f"<div class='subtitle'>{Schooltuinen_informatie}</div>", unsafe_allow_html=True)
+
+    st.markdown(f"<div class='text'>{Schooltuinen_informatie_tekst}</div>", unsafe_allow_html=True)
+
+    st.write("<br>", unsafe_allow_html=True)
+
+    st.download_button(
+    label="Download template schooltuinen informatie",
+    data=open(school_template_path, "rb").read(),
+    file_name="Template_schooltuinen_informatie.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    use_container_width=True  # Makes the button as wide as the text
+    )
+
+    st.write("<br>", unsafe_allow_html=True)
+
+    st.markdown(f"<div class='subtitle'>{Beschikbaarheid_groepen}</div>", unsafe_allow_html=True)
+
+    st.markdown(f"<div class='text'>{Beschikbaarheid_groepen_tekst}</div>", unsafe_allow_html=True)
+
+
     col1, col2, col3 = st.columns([1, 1, 1])
-    with col1:
-        st.download_button(
-            label="Download beschikbaarheid groepen",
-            data=open(educators_template_path, "rb").read(),
-            file_name="educators_template.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )        
-    with col2:
-        st.download_button(
-        label="Download beschikbaarheid groepen template",
-        data=open(school_template_path, "rb").read(),
-        file_name="school_template.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-    with col3:
-        st.download_button(
-            label="Download schooltuinen informatie template",
-            data=open(garden_template_path, "rb").read(),
-            file_name="garden_template.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+
+    # with col1:
+    #     st.download_button(
+    #         label="Download template beschikbaarheid educatief medewerkers",
+    #         data=open(educators_template_path, "rb").read(),
+    #         file_name="educators_template.xlsx",
+    #         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    #     )        
+    # with col2:
+    #     st.download_button(
+    #     label="Download template beschikbaarheid groepen",
+    #     data=open(school_template_path, "rb").read(),
+    #     file_name="school_template.xlsx",
+    #     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    #     )
+    # with col3:
+    #     st.download_button(
+    #         label="Download template schooltuinen informatie",
+    #         data=open(garden_template_path, "rb").read(),
+    #         file_name="garden_template.xlsx",
+    #         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    #     )
     
     st.divider()
+
+    st.markdown(f"<div class='title'>{Upload_files}</div>", unsafe_allow_html=True)
+
+    st.write("<br>", unsafe_allow_html=True)
     
     educators_bytes = st.file_uploader(educators_label, type = "xlsx")
     school_bytes = st.file_uploader(school_label, type = "xlsx")
     garden_bytes = st.file_uploader(garden_label, type = "xlsx")
-
-
             
     # Create buttons to download templates
-
-
-
-
-
 
     inputs_needed = not (educators_bytes and school_bytes and garden_bytes)
 
     if "run_clicked" not in st.session_state:
         st.session_state.run_clicked = False
-        
-    run_override = st.button("Run even if inputs are missing")
-    run = st.button(run_label, use_container_width=True, disabled=inputs_needed)
-    
+
     st.divider()
 
-    if run or run_override:
+        
+   # run_override = st.button("Run even if inputs are missing")
+    run = st.button(run_label, use_container_width=True, disabled=inputs_needed)
+    
+    
+    if run: #or run_override:
         st.session_state.run_clicked = True        
         try:
             educator_data, garden_data, school_data, timeslots, warnings = run_extract_transform_load(educators_bytes, garden_bytes, school_bytes)
@@ -136,31 +197,51 @@ def main():
                     unsafe_allow_html=True
                 )
             else:
-                st.subheader(f"Resultaten voor {schooltuin}")
+                #st.subheader(f"Resultaten voor {schooltuin}")
+                st.markdown(f"<div class='title'> Resultaten voor {schooltuin}</div>", unsafe_allow_html=True)
 
-                st.write(f"**Beschikare tuintjes:** {stats['available_plots']}")
-                st.write(f"**Reserve tuintjes:** {stats['reserved_plots']}")
-                st.write(f"**Medewerkers:** {', '.join(stats['teachers'])}")
-                st.write(f"**Aantal leerlingen ingedeeld:** {stats['assigned_students']}")
-                st.write(f"**Aantal leerlingen niet ingedeeld:** {stats['unassigned_students']}")
-                st.write(f"**Aantal groepen ingedeeld:** {len(stats['assigned_groups'])}")
-                
+                st.write("<br>", unsafe_allow_html=True)
+
+
+                st.markdown(f"<div class='text'><b>Beschikbare tuintjes:</b> {stats['available_plots']}</div>", unsafe_allow_html=True)
+                st.write("<br>", unsafe_allow_html=True)
+                st.markdown(f"<div class='text'><b>Reserve tuintjes:</b> {stats['reserved_plots']}</div>", unsafe_allow_html=True)
+                st.write("<br>", unsafe_allow_html=True)
+                st.markdown(f"<div class='text'><b>Medewerkers:</b> {', '.join(stats['teachers'])}</div>", unsafe_allow_html=True)
+                st.write("<br>", unsafe_allow_html=True)
+                st.markdown(f"<div class='text'><b>Aantal leerlingen ingedeeld:</b> {stats['assigned_students']}</div>", unsafe_allow_html=True)
+                st.write("<br>", unsafe_allow_html=True)
+                st.markdown(f"<div class='text'><b>Aantal leerlingen niet ingedeeld:</b> {stats['unassigned_students']}</div>", unsafe_allow_html=True)
+                st.write("<br>", unsafe_allow_html=True)
+                st.markdown(f"<div class='text'><b>Aantal groepen ingedeeld:</b> {len(stats['assigned_groups'])}</div>", unsafe_allow_html=True)
+
+                st.write("<br>", unsafe_allow_html=True)
+               
                 if len(stats['unassigned_groups']) > 0:
-                    st.markdown(
-                        f"<span style='color: red; font-weight: bold;'>Aantal groepen niet ingedeeld: {len(stats['unassigned_groups'])}</span>",
-                        unsafe_allow_html=True
-                    )
-                    st.markdown(
-                        f"<span style='color: red; font-weight: bold;'>Groepen die niet zijn ingedeeld: {', '.join(map(str, stats['unassigned_groups']))}</span>",
-                        unsafe_allow_html=True
-                    )
-                else:
-                    st.write(f"**Aantal groepen niet ingedeeld:** Iedereen ingedeeld ✅")
 
-            st.table(data=stats['schedule'])
-            st.table(data=stats['current_educator_data'])
-                
-    
+                    #E32636
+                    #st.markdown(
+                        #f"<span style='color: red; font-weight: bold;'>Aantal groepen niet ingedeeld: {len(stats['unassigned_groups'])}</span>",
+                        #unsafe_allow_html=True
+                   #)
+                    st.markdown(f"<div class='text_red'><b>Aantal groepen niet ingedeeld:</b> {len(stats['unassigned_groups'])}</span>", unsafe_allow_html=True)
+                    #st.markdown(
+                       # f"<span style='color: red; font-weight: bold;'>Groepen die niet zijn ingedeeld: {', '.join(map(str, stats['unassigned_groups']))}</span>",
+                       # unsafe_allow_html=True
+                    #)
+                    st.write("<br>", unsafe_allow_html=True)
+                    st.markdown(f"<div class='text_red'><b>Groepen die niet zijn ingedeeld:</b> {', '.join(map(str, stats['unassigned_groups']))}</span>", unsafe_allow_html=True)
+                else:
+                    #st.write(f"**Aantal groepen niet ingedeeld:** Iedereen ingedeeld ✅")
+                    st.markdown(f"<div class='text'><b>Aantal groepen niet ingedeeld:</b> Iedereen ingedeeld ✅</span>", unsafe_allow_html=True)
+
+            st.write("<br>", unsafe_allow_html=True)
+
+            st.dataframe(data=stats['schedule'])
+            st.write("<br>", unsafe_allow_html=True)
+            st.dataframe(data=stats['current_educator_data'])
+
+   
     # # Streamlit app
     # st.title("Distributie keuzes")
 
