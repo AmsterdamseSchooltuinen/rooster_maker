@@ -1,3 +1,4 @@
+
 streamlit
 numpy==2.2.2
 pandas==2.2.3
@@ -7,3 +8,4 @@ six==1.17.0
 tzdata==2025.1
 ortools==9.11.4210
 matplotlib==3.9.3
+pyyaml==6.0.2
