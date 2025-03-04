@@ -177,12 +177,6 @@ def bus_groups_of_same_school_go_together(
     return model
 
 
-# def constraint(
-#     garden: Garden, model: cp_model.CpModel, availability: dict
-# ) -> cp_model.CpModel:
-#     return model
-
-
 CONSTRAINT_METHODS = {
     "only_schedule_groups_when_they_are_available": only_schedule_groups_when_they_are_available,
     "only_schedule_teachers_when_they_are_available": only_schedule_teachers_when_they_are_available,

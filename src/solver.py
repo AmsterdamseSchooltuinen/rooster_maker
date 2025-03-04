@@ -16,7 +16,6 @@ def solve_schedule_problem(garden: Garden) -> tuple[cp_model.CpSolver, dict, boo
 
     # Initialize the model
     model = cp_model.CpModel()
-    # print(garden.n_required_plots)
 
     availability = make_group_teacher_time_slots_dict(garden, model)
 
@@ -39,6 +38,7 @@ def solve_schedule_problem(garden: Garden) -> tuple[cp_model.CpSolver, dict, boo
     start = time.time()
     status = solver.Solve(model)
     print(f"Time: {time.time() - start:.2f} s")
+
     # Return results
     if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
         solved_status = True

@@ -27,7 +27,6 @@ def run_program(
     output = None
 
     for garden_name in unique_gardens:
-        print(garden_name)
         # Subset the data to only include data relevant to the current garden
         current_school_data = school_data.loc[school_data["garden_name"] == garden_name]
         current_educator_data = educator_data.loc[
@@ -118,14 +117,14 @@ def run_program(
         )
         all_summary_stats[garden_name] = summary_stats
 
-        output = format_output(current_garden, solver_result)
+        #output = format_output(current_garden, solver_result)
 
     all_summary_stats["Alle Tuinen Overzicht"] = combine_garden_stats(all_summary_stats)
-    print(all_summary_stats["Alle Tuinen Overzicht"])
 
-    return all_summary_stats, output
+    return all_summary_stats #, output
 
 
+"""
 def format_output(garden: Garden, solver: cp_model.CpSolver):
     teachers = list(garden.teacher_availability.keys())
     groups = garden.groups
@@ -171,7 +170,7 @@ def format_output(garden: Garden, solver: cp_model.CpSolver):
                                columns=['Inschrijfcode', 'Schoolnaam', 'Vervoer'])
         df_unassigned = pd.concat([df_unassigned, new_row], ignore_index=True)
     return df_assigned, df_unassigned
-
+"""
 
 def get_summary_statistics(
     solved_info: cp_model.CpSolver,
@@ -216,15 +215,13 @@ def get_summary_statistics(
             "teachers": garden.teachers,
         }
 
-    # If there was no feasible solution found, store information about that
     else:
         # TODO: change this text to being in Dutch!
         summary = ("The scheduling problem could not be solved for this garden with the current "
                 "input data and the current constraints. Please review the data and constraints and run again.")
 
-    SHOW_LOGS = True
+    SHOW_LOGS = False
     if SHOW_LOGS:
-        # display(schedule)
         if len(unassigned_groups) > 0:
             print("WARNING UNASSIGNED GROUPS")
             for group in unassigned_groups:
