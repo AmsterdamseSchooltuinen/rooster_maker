@@ -3,6 +3,7 @@ from ortools.sat.python import cp_model
 
 from src.garden import Garden
 from src.solver import solve_schedule_problem
+
 # from src.excel_output_formatter import create_excel_output
 
 
@@ -112,13 +113,16 @@ def run_program(
         solver_result, assignment, solved = solve_schedule_problem(current_garden)
 
         # Get the summary statistics and output
-        summary_stats = get_summary_statistics(solver_result,
-                                               current_garden,
-                                               assignment,
-                                               solved, 
-                                               current_educator_data)
+        summary_stats = get_summary_statistics(
+            solver_result, current_garden, assignment, solved, current_educator_data
+        )
         all_summary_stats[garden_name] = summary_stats
+
         output = format_output(current_garden, solver_result)
+
+    all_summary_stats["Alle Tuinen Overzicht"] = combine_garden_stats(all_summary_stats)
+    print(all_summary_stats["Alle Tuinen Overzicht"])
+
     return all_summary_stats, output
 
 
@@ -169,11 +173,13 @@ def format_output(garden: Garden, solver: cp_model.CpSolver):
     return df_assigned, df_unassigned
 
 
-def get_summary_statistics(solved_info: cp_model.CpSolver,
-                           garden: Garden,
-                           assignment: dict,
-                           solved: bool,
-                           current_educator_data: pd.DataFrame):
+def get_summary_statistics(
+    solved_info: cp_model.CpSolver,
+    garden: Garden,
+    assignment: dict,
+    solved: bool,
+    current_educator_data: pd.DataFrame,
+):
 
     # If the garden has a feasible solution, create the summary_statistics dictionary
     if solved:
@@ -195,7 +201,6 @@ def get_summary_statistics(solved_info: cp_model.CpSolver,
                         )
                         assigned_students += garden.group_sizes[group]
 
-                    
         unassigned_groups = set(garden.groups) - set(assigned_groups)
         for group in unassigned_groups:
             unassigned_students += garden.group_sizes[group]
@@ -208,7 +213,7 @@ def get_summary_statistics(solved_info: cp_model.CpSolver,
             "current_educator_data": current_educator_data,
             "available_plots": garden.available_plots,
             "reserved_plots": garden.reserved_plots,
-            "teachers": garden.teachers
+            "teachers": garden.teachers,
         }
 
     # If there was no feasible solution found, store information about that
@@ -217,4 +222,66 @@ def get_summary_statistics(solved_info: cp_model.CpSolver,
         summary = ("The scheduling problem could not be solved for this garden with the current "
                 "input data and the current constraints. Please review the data and constraints and run again.")
 
+    SHOW_LOGS = True
+    if SHOW_LOGS:
+        # display(schedule)
+        if len(unassigned_groups) > 0:
+            print("WARNING UNASSIGNED GROUPS")
+            for group in unassigned_groups:
+                print(f"{group} size:{ garden.group_sizes[group]}")
+            print()
+        print("available plots", garden.available_plots_with_reserve)
+        print("assigned students", assigned_students)
+        print("max buses per slot", garden.max_buses_per_time_slot)
     return summary
+
+
+def combine_garden_stats(all_summary_stats: dict) -> dict:
+    """
+    Combines the summary statistics of all gardens into one dictionary
+    :param all_summary_stats: dictionary containing the summary statistics of all gardens
+    :return: dictionary containing the combined summary statistics
+    """
+    all_gardens = list(all_summary_stats.keys())
+    combined_stats = {
+        "assigned_groups": [],
+        "unassigned_groups": [],
+        "assigned_students": 0,
+        "unassigned_students": 0,
+        "schedule": pd.DataFrame(),
+        "current_educator_data": pd.DataFrame(),
+        "available_plots": 0,
+        "reserved_plots": 0,
+        "teachers": [],
+    }
+
+    for garden in all_gardens:
+        combined_stats["assigned_groups"].extend(
+            all_summary_stats[garden]["assigned_groups"]
+        )
+        combined_stats["unassigned_groups"].extend(
+            all_summary_stats[garden]["unassigned_groups"]
+        )
+        combined_stats["assigned_students"] += all_summary_stats[garden][
+            "assigned_students"
+        ]
+        combined_stats["unassigned_students"] += all_summary_stats[garden][
+            "unassigned_students"
+        ]
+        combined_stats["schedule"] = pd.concat(
+            [combined_stats["schedule"], all_summary_stats[garden]["schedule"]]
+        )
+        combined_stats["current_educator_data"] = pd.concat(
+            [
+                combined_stats["current_educator_data"],
+                all_summary_stats[garden]["current_educator_data"],
+            ],
+            axis=0,
+        )
+        combined_stats["available_plots"] += all_summary_stats[garden][
+            "available_plots"
+        ]
+        combined_stats["reserved_plots"] += all_summary_stats[garden]["reserved_plots"]
+        combined_stats["teachers"].extend(all_summary_stats[garden]["teachers"])
+
+    return combined_stats

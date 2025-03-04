@@ -1,6 +1,7 @@
 from ortools.sat.python import cp_model
 from src.constraint_functions import add_constraints
 from src.garden import Garden
+from src.objective_function import add_objective_function
 import time
 
 
@@ -52,46 +53,11 @@ def make_group_teacher_time_slots_dict(garden: Garden, model: cp_model.CpModel) 
     group_time_teacher_availability = {}
 
     for group in garden.groups:
-        for time in garden.time_slots:
+        for time_slot in garden.time_slots:
             for teacher in garden.teachers:
-                group_time_teacher_availability[(group, time, teacher)] = (
-                    model.NewBoolVar(f"{group}_{time}_{teacher}")
+                group_time_teacher_availability[(group, time_slot, teacher)] = (
+                    model.NewBoolVar(f"{group}_{time_slot}_{teacher}")
                 )
 
     print("search space size:", len(group_time_teacher_availability))
     return group_time_teacher_availability
-
-
-def add_objective_function(garden: Garden, model: cp_model.CpModel, assignment: dict):
-    # TODO: update the Objective function
-    a = 0.005
-    model.Maximize(
-        sum(
-            assignment[(group, time, teacher)]
-            for group in garden.groups
-            for time in garden.time_slots
-            for teacher in garden.teachers
-        )
-        + a
-        * sum(
-            assignment[(group, time, teacher)]
-            * (
-                10
-                if time == garden.group_availability[group][0]
-                else (
-                    5
-                    if len(garden.group_availability[group]) > 1
-                    and time == garden.group_availability[group][1]
-                    else (
-                        2
-                        if len(garden.group_availability[group]) > 2
-                        and time == garden.group_availability[group][2]
-                        else 0
-                    )
-                )
-            )
-            for group in garden.groups
-            for time in garden.time_slots
-            for teacher in garden.teachers
-        )
-    )

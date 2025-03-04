@@ -39,17 +39,12 @@ educators_need_maintenance_slots:
   included: true
   hard_constraint: true
 
-
-
-
-
-#Not yet implemented
 bus_groups_of_same_school_go_together:
-  included: false
+  included: true
   hard_constraint: true
 
 
-
+# Not Implemented
 bus_groups_come_after_each_other:
   included: false
   hard_constraint: false
