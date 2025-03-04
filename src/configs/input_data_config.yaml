@@ -11,8 +11,8 @@ labels:
     <br><br>
 
     * Een <strong><span style="color: #2682FF;">B</span></strong> betekent dat de educatief medewerker <strong><span style="color: #2682FF;">beschikbaar</span></strong> is.  
-    * Een <strong><span style="color: #2682FF;">N</span></strong> betekent dat de educatief medewerkers <strong><span style="color: #2682FF;">niet beschikbaar</span></strong> is.  
-    * Een <strong><span style="color: #2682FF;">O</span></strong> betekent dat de educatief medewerkers <strong><span style="color: #2682FF;">onderhoud</span></strong> heeft.  
+    * Een <strong><span style="color: #2682FF;">N</span></strong> betekent dat de educatief medewerker <strong><span style="color: #2682FF;">niet beschikbaar</span></strong> is.  
+    * Een <strong><span style="color: #2682FF;">O</span></strong> betekent dat de educatief medewerker <strong><span style="color: #2682FF;">onderhoud</span></strong> heeft.  
     * Een <strong><span style="color: #2682FF;">V</span></strong> betekent dat de educatief medewerker <strong><span style="color: #2682FF;">voorwaardelijk beschikbaar</span></strong> is.<br>  
     Wanneer meerdere lesmomenten met een <strong><span style="color: #2682FF;">V</span></strong> zijn ingevuld, wordt de educatief medewerker op een van die lesmomenten niet ingeroosterd. De overige lesmomenten met een <strong><span style="color: #2682FF;">V</span></strong> blijven beschikbaar voor eventuele indeling.
 
