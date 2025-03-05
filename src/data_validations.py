@@ -55,6 +55,7 @@ def get_frontend_name(new_name, table_name, config):
     elif table_name == "garden_data":
         mapping = config["etl"]["garden"]["col_mapping"]
     else:
+        # TODO: Error message in English, consider changing to Dutch
         raise ValueError("Invalid table name")
     
     mapping = flatten_dicts(mapping)
@@ -96,12 +97,14 @@ def confirm_key_exists_and_is_identical(key_col: str, df1: pd.DataFrame, df2: pd
         bool: True if the key column does not exist in both dataframes or if the values are not identical, False otherwise.
     """
     if key_col not in df1.columns or key_col not in df2.columns:
+        # TODO: Error message in English, consider changing to Dutch
         return True, f"Key column {get_frontend_name(key_col, df_name, config)} does not exist in both dataframes"
 
     unique_values_df1 = df1[key_col].to_list()
     unique_values_df2 = df2[key_col].to_list()
 
     if not (set(unique_values_df1) == set(unique_values_df2)):
+        # TODO: Error message in English, consider changing to Dutch
         return True, f"Key column ({get_frontend_name(key_col, df_name, config)}) values are not identical \n{unique_values_df1} \n{unique_values_df2}"
 
     return False, "All good"
@@ -119,8 +122,10 @@ def check_key_cols(df: pd.DataFrame, key_cols: list[str], df_name: str) -> tuple
     """
     for col in key_cols:
         if col not in df.columns:
+            # TODO: Part of error message in English, consider changing to Dutch
             return True, f"column naam: {col}, {get_frontend_name(col, df_name, config)} not available in file. Heb je het juiste bestand geüpload?"
         if df[col].isnull().values.any():
+            # TODO: Error message in English, consider changing to Dutch
             return True, f"Blank values found in key column {get_frontend_name(col, df_name, config)}"
     return False, "All good"
 
@@ -137,6 +142,7 @@ def check_any_empty_cols(df: pd.DataFrame, df_name: str) -> tuple[bool, str]:
     cols = df.columns
     for col in cols:
         if df[col].isnull().values.any():
+            # TODO: Error message in English, consider changing to Dutch
             return True, f"Blank values found in '{get_frontend_name(col, df_name, config)}'"
     return False, "All good"
 
@@ -161,4 +167,5 @@ def test_validation(df: pd.DataFrame, cols: list[str], df_name: str) -> tuple[bo
     """
     Test validation function.
     """
+    # TODO: Error message in English, consider changing to Dutch
     return True, f"(test) Column {get_frontend_name(cols[0], df_name, config)} not available in {df_name}"

@@ -1,7 +1,6 @@
 """Utils to read yaml files and add dev suffix to permissions"""
 
 from pathlib import Path
-
 import yaml
 
 
@@ -11,9 +10,9 @@ def get_config(config_name: str) -> dict:
     Returns:
         dict: dictionary of the solver config vars
     """
-    if config_name not in ["solver_config", "input_data_config", "constraints_config"]:
-        print(f"Invalid config name: {config_name}")
-        # raise Exception(f"Invalid config name: {config_name}")
+    if config_name not in ["solver_config", "input_data_config", "constraints_config", "objective_config"]:
+        # TODO: Error message in English, consider changing to Dutch
+        raise Exception(f"Invalid config name: {config_name}")
     file_path = Path(__file__).parent / f"{config_name}.yaml"
     return _open_yaml_file(file_path)
 
@@ -32,4 +31,5 @@ def _open_yaml_file(file_path: str) -> dict:
             data = yaml.safe_load(file)
             return data
         except yaml.YAMLError as e:
+            # TODO: Error message in English, consider changing to Dutch
             raise Exception(f"Error reading {file_path}: {e}")
