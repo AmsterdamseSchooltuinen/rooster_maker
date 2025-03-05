@@ -1,14 +1,12 @@
-import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-from io import BytesIO
+import streamlit as st
 import os
-import io
 
 from src.configs.get_config import get_config
 from src.extract_transform_load import run_extract_transform_load
 from src.data_validations import ValidationExceptionCollector
 from src.runner import run_program
+from src.excel_output_formatter import create_excel_output
 
 
 def main_test():
@@ -35,10 +33,11 @@ def main():
     garden_template_name = config["template_file_names"]["garden_template"]
     Upload_files = config["labels"]["Upload_files"]
 
+    # Tab title
+    st.set_page_config(page_title="Rooster planner")
 
     css_styles = config['Styles']['css']
     st.markdown(f"<style>{css_styles}</style>", unsafe_allow_html=True)
-    
 
     #Title
     st.markdown(f"<div class='header'>{title_label}</div>", unsafe_allow_html=True)
@@ -153,16 +152,19 @@ def main():
             if warnings:
                 st.header("⚠️ Mogelijk is er een probleem", divider="orange")
                 for warning in warnings:
-                    with st.warning("Mischien een problem?"):
+                    with st.warning("Misschien is er een problem?"):
                         st.markdown(f"**{warning}**")
             # RUN EVERYTHING HERE
-            # TODO: update the output function because it doesn't work at the moment
-            summary_statistics_dict, final_output_df = run_program(school_data=school_data,
-                                                                   educator_data=educator_data,
-                                                                   garden_data=garden_data,
-                                                                   time_slots=timeslots)
-            
-            st.session_state.final_output_df = final_output_df
+            with st.spinner("Rooster optimaliseren...", show_time=True):
+                summary_statistics_dict = run_program(school_data=school_data,
+                                                      educator_data=educator_data,
+                                                      garden_data=garden_data,
+                                                      time_slots=timeslots)
+
+            st.session_state.final_output_df = create_excel_output(summary_statistics_dict)
+
+            # Set session state variables
+            #st.session_state.final_output_df = convert_df_to_excel(pd.DataFrame()) # final_output_df
             st.session_state.summary_statistics_dict = summary_statistics_dict
             st.session_state.run_finished = True
 
@@ -173,13 +175,12 @@ def main():
                     st.markdown(f"**{ex}**")
     
     if st.session_state.get("run_finished", False):
-        st.write(finished_run_label)
+        st.success(finished_run_label)
 
         # Download button for Excel
-        excel_output_data = convert_df_to_excel(st.session_state.final_output_df)
         st.download_button(
             label="Download Resultaten",
-            data=excel_output_data,
+            data=st.session_state.final_output_df,
             file_name="resultaten_schooltuinen_optimalisatie.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
@@ -197,7 +198,6 @@ def main():
                     unsafe_allow_html=True
                 )
             else:
-                #st.subheader(f"Resultaten voor {schooltuin}")
                 st.markdown(f"<div class='title'> Resultaten voor {schooltuin}</div>", unsafe_allow_html=True)
 
                 st.write("<br>", unsafe_allow_html=True)
@@ -219,20 +219,11 @@ def main():
                
                 if len(stats['unassigned_groups']) > 0:
 
-                    #E32636
-                    #st.markdown(
-                        #f"<span style='color: red; font-weight: bold;'>Aantal groepen niet ingedeeld: {len(stats['unassigned_groups'])}</span>",
-                        #unsafe_allow_html=True
-                   #)
                     st.markdown(f"<div class='text_red'><b>Aantal groepen niet ingedeeld:</b> {len(stats['unassigned_groups'])}</span>", unsafe_allow_html=True)
-                    #st.markdown(
-                       # f"<span style='color: red; font-weight: bold;'>Groepen die niet zijn ingedeeld: {', '.join(map(str, stats['unassigned_groups']))}</span>",
-                       # unsafe_allow_html=True
-                    #)
+
                     st.write("<br>", unsafe_allow_html=True)
                     st.markdown(f"<div class='text_red'><b>Groepen die niet zijn ingedeeld:</b> {', '.join(map(str, stats['unassigned_groups']))}</span>", unsafe_allow_html=True)
                 else:
-                    #st.write(f"**Aantal groepen niet ingedeeld:** Iedereen ingedeeld ✅")
                     st.markdown(f"<div class='text'><b>Aantal groepen niet ingedeeld:</b> Iedereen ingedeeld ✅</span>", unsafe_allow_html=True)
 
             st.write("<br>", unsafe_allow_html=True)
@@ -281,13 +272,6 @@ def main():
     # # Display pie chart in Streamlit
     # st.pyplot(fig)
 
-# Function to convert DataFrame to Excel
-def convert_df_to_excel(df):
-    output = BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        df.to_excel(writer, index=False, sheet_name='Sheet1')
-    processed_data = output.getvalue()
-    return processed_data
 
 if __name__ == "__main__":
     main()

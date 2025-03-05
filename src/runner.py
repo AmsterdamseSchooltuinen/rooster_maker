@@ -81,7 +81,6 @@ def run_program(
                     groups_that_go_together_with_bus_per_school[row["school_id"]] = [
                         row["period_id"]
                     ]
-        # display(groups_that_go_together_with_bus_per_school)
 
         current_garden = Garden(
             name=garden_name,
@@ -116,7 +115,7 @@ def run_program(
             solver_result, current_garden, assignment, solved, current_educator_data
         )
         all_summary_stats[garden_name] = summary_stats
-
+        # TODO: how go from the solver to the actual output data that we want?
         #output = format_output(current_garden, solver_result)
 
     all_summary_stats["Alle Tuinen Overzicht"] = combine_garden_stats(all_summary_stats)
@@ -124,7 +123,6 @@ def run_program(
     return all_summary_stats #, output
 
 
-"""
 def format_output(garden: Garden, solver: cp_model.CpSolver):
     teachers = list(garden.teacher_availability.keys())
     groups = garden.groups
@@ -170,7 +168,7 @@ def format_output(garden: Garden, solver: cp_model.CpSolver):
                                columns=['Inschrijfcode', 'Schoolnaam', 'Vervoer'])
         df_unassigned = pd.concat([df_unassigned, new_row], ignore_index=True)
     return df_assigned, df_unassigned
-"""
+
 
 def get_summary_statistics(
     solved_info: cp_model.CpSolver,
