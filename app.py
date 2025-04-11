@@ -2,6 +2,8 @@ import pandas as pd
 import streamlit as st
 import os
 
+st.set_page_config(page_title="Rooster planner")
+
 from src.configs.get_config import get_config
 from src.extract_transform_load import run_extract_transform_load
 from src.data_validations import ValidationExceptionCollector
@@ -34,7 +36,7 @@ def main():
     Upload_files = config["labels"]["Upload_files"]
 
     # Tab title
-    st.set_page_config(page_title="Rooster planner")
+    
 
     css_styles = config['Styles']['css']
     st.markdown(f"<style>{css_styles}</style>", unsafe_allow_html=True)
@@ -84,7 +86,7 @@ def main():
 
     st.download_button(
     label="Download template schooltuinen informatie",
-    data=open(school_template_path, "rb").read(),
+    data=open(garden_template_path, "rb").read(),
     file_name="Template_schooltuinen_informatie.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     use_container_width=True  # Makes the button as wide as the text
@@ -96,6 +98,13 @@ def main():
 
     st.markdown(f"<div class='text'>{Beschikbaarheid_groepen_tekst}</div>", unsafe_allow_html=True)
 
+    st.download_button(
+    label="Download template beschikbaarheid groepen",
+    data=open(school_template_path, "rb").read(),
+    file_name="Template_beschikbaarheid_groepen.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    use_container_width=True  # Makes the button as wide as the text
+    )
 
     col1, col2, col3 = st.columns([1, 1, 1])
 
@@ -155,7 +164,7 @@ def main():
                     with st.warning("Misschien is er een problem?"):
                         st.markdown(f"**{warning}**")
             # RUN EVERYTHING HERE
-            with st.spinner("Rooster optimaliseren...", show_time=True):
+            with st.spinner("Rooster optimaliseren..."):
                 summary_statistics_dict = run_program(school_data=school_data,
                                                       educator_data=educator_data,
                                                       garden_data=garden_data,
@@ -216,21 +225,34 @@ def main():
                 st.markdown(f"<div class='text'><b>Aantal groepen ingedeeld:</b> {len(stats['assigned_groups'])}</div>", unsafe_allow_html=True)
 
                 st.write("<br>", unsafe_allow_html=True)
-               
+
                 if len(stats['unassigned_groups']) > 0:
 
                     st.markdown(f"<div class='text_red'><b>Aantal groepen niet ingedeeld:</b> {len(stats['unassigned_groups'])}</span>", unsafe_allow_html=True)
-
-                    st.write("<br>", unsafe_allow_html=True)
                     st.markdown(f"<div class='text_red'><b>Groepen die niet zijn ingedeeld:</b> {', '.join(map(str, stats['unassigned_groups']))}</span>", unsafe_allow_html=True)
-                else:
-                    st.markdown(f"<div class='text'><b>Aantal groepen niet ingedeeld:</b> Iedereen ingedeeld ✅</span>", unsafe_allow_html=True)
+
+               
+                
 
             st.write("<br>", unsafe_allow_html=True)
 
+            st.markdown(f"<div class='text'><b>Rooster voor docenten:</b></div>", unsafe_allow_html=True)
             st.dataframe(data=stats['schedule'])
             st.write("<br>", unsafe_allow_html=True)
+            st.markdown(f"<div class='text'><b>Beschikbaarheid docenten:</b></div>", unsafe_allow_html=True)
             st.dataframe(data=stats['current_educator_data'])
+           
+            if len(stats['unassigned_groups']) > 0:
+
+                    #st.markdown(f"<div class='text_red'><b>Aantal groepen niet ingedeeld:</b> {len(stats['unassigned_groups'])}</span>", unsafe_allow_html=True)
+
+                    st.write("<br>", unsafe_allow_html=True)
+                    #st.markdown(f"<div class='text_red'><b>Groepen die niet zijn ingedeeld:</b> {', '.join(map(str, stats['unassigned_groups']))}</span>", unsafe_allow_html=True)
+                    st.markdown(f"<div class='text_red'><b>Voorkeuren groepen die niet zijn ingedeeld:</b>", unsafe_allow_html=True)
+
+                    st.dataframe(data=stats['unassigned_groups_preference'])
+            else:
+                    st.markdown(f"<div class='text'><b>Aantal groepen niet ingedeeld:</b> Iedereen ingedeeld ✅</span>", unsafe_allow_html=True)
 
    
     # # Streamlit app
@@ -273,5 +295,23 @@ def main():
     # st.pyplot(fig)
 
 
+
 if __name__ == "__main__":
-    main()
+    
+
+    with st.sidebar:
+        st.markdown("<h3 style='font-size: 22px;'>📂 Kies een sectie</h3>", unsafe_allow_html=True)
+
+        page = st.radio(
+            label="",
+            options=["📊 Roostermaker", "📄 Documentatie"]
+        )
+
+    if "Roostermaker" in page:
+        main()
+
+    elif "Documentatie" in page:
+        st.title("📄 Documentatie")
+        st.markdown("""
+        Welkom bij de Schooltuinen Roostermaker!
+        """)
