@@ -14,7 +14,7 @@ from src.excel_output_formatter import create_excel_output
 def main_test():
     run_extract_transform_load(None, None, None)
 
-def main():
+def mains():
     config = get_config("input_data_config")
     title_label = config["labels"]["title_label"]
     sub_title = config["labels"]["sub_title"]
@@ -308,7 +308,7 @@ if __name__ == "__main__":
         )
 
     if "Roostermaker" in page:
-        main()
+        mains()
 
     elif "Documentatie" in page:
         st.title("📄 Documentatie")
