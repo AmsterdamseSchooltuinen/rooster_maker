@@ -170,7 +170,7 @@ def main():
                                                       garden_data=garden_data,
                                                       time_slots=timeslots)
 
-            st.session_state.final_output_df = create_excel_output(summary_statistics_dict)
+            # st.session_state.final_output_df = create_excel_output(summary_statistics_dict)
 
             # Set session state variables
             #st.session_state.final_output_df = convert_df_to_excel(pd.DataFrame()) # final_output_df
