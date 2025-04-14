@@ -61,3 +61,14 @@ def make_group_teacher_time_slots_dict(garden: Garden, model: cp_model.CpModel) 
 
     print("search space size:", len(group_time_teacher_availability))
     return group_time_teacher_availability
+
+
+    for group in garden.groups:
+        for time_slot in garden.time_slots:
+            for teacher in garden.teachers:
+                group_time_teacher_availability[(group, time_slot, teacher)] = (
+                    model.NewBoolVar(f"{group}_{time_slot}_{teacher}")
+                )
+
+    print("search space size:", len(group_time_teacher_availability))
+    return group_time_teacher_availability
