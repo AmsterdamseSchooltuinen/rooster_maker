@@ -170,7 +170,7 @@ def main():
                                                       garden_data=garden_data,
                                                       time_slots=timeslots)
 
-            # st.session_state.final_output_df = create_excel_output(summary_statistics_dict)
+            st.session_state.final_output_df = create_excel_output(summary_statistics_dict)
 
             # Set session state variables
             #st.session_state.final_output_df = convert_df_to_excel(pd.DataFrame()) # final_output_df
@@ -187,12 +187,12 @@ def main():
         st.success(finished_run_label)
 
         # Download button for Excel
-        #st.download_button(
-           # label="Download Resultaten",
-           # data=st.session_state.final_output_df,
-           # file_name="resultaten_schooltuinen_optimalisatie.xlsx",
-          #  mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-       # )
+        st.download_button(
+            label="Download Resultaten",
+            data=st.session_state.final_output_df,
+            file_name="resultaten_schooltuinen_optimalisatie.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
         
         st.divider()
 
@@ -315,3 +315,4 @@ if __name__ == "__main__":
         st.markdown("""
         Welkom bij de Schooltuinen Roostermaker!
         """)
+
