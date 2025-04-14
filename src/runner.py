@@ -27,6 +27,7 @@ def run_program(
     output = None
 
     for garden_name in unique_gardens:
+        print(garden_name)
         # Subset the data to only include data relevant to the current garden
         current_school_data = school_data.loc[school_data["garden_name"] == garden_name]
         current_educator_data = educator_data.loc[
@@ -81,6 +82,7 @@ def run_program(
                     groups_that_go_together_with_bus_per_school[row["school_id"]] = [
                         row["period_id"]
                     ]
+        # display(groups_that_go_together_with_bus_per_school)
 
         current_garden = Garden(
             name=garden_name,
@@ -115,59 +117,18 @@ def run_program(
             solver_result, current_garden, assignment, solved, current_educator_data
         )
         all_summary_stats[garden_name] = summary_stats
-        # TODO: how go from the solver to the actual output data that we want?
-        #output = format_output(current_garden, solver_result)
+        output = format_output(solver_result, current_garden)
 
     all_summary_stats["Alle Tuinen Overzicht"] = combine_garden_stats(all_summary_stats)
+    print(all_summary_stats["Alle Tuinen Overzicht"])
+    return all_summary_stats, output
 
-    return all_summary_stats #, output
 
-
-def format_output(garden: Garden, solver: cp_model.CpSolver):
-    teachers = list(garden.teacher_availability.keys())
-    groups = garden.groups
-    time_slots = garden.time_slots
-    tuinlocatie = garden.name
-    assigned_groups = []
-    # Dictionary for output assigned schools
-    output_data = {"Tuinlocatie": [tuinlocatie] + [""] * (len(time_slots) - 1), "Tijdslot": time_slots}
-    for teacher in teachers:
-        inschrijfcode_list = []
-        schoolname_list = []
-        transport_list = []
-        for time_slot in time_slots:
-            group_assigned = ""
-            for group in groups:
-                #check if this works
-                if solver.Value(assignment[(group, time_slot, teacher)]) == 1:
-                    group_assigned = group
-                    assigned_groups.append(group)
-                    break
-            inschrijfcode_list.append(group_assigned)
-            if group_assigned:
-                #find schoolname and transportation based on periodeid
-                schoolname_list.append("")
-                transport_list.append("")
-            else:
-                schoolname_list.append("")
-                transport_list.append("")
-        output_data[f"{teacher}"] = inschrijfcode_list
-        output_data[f"Schoolnaam_{teacher}"] = schoolname_list
-        output_data[f"Vervoer_{teacher}"] = transport_list
-    # Convert the dictionary to a df
-    df_assigned = pd.DataFrame(output_data)
-    # DataFrame for unassigned groups
-    df_unassigned = pd.DataFrame(columns=['Inschrijfcode', 'Schoolnaam', 'Vervoer'])
-    unassigned_groups = list(set(groups) - set(assigned_groups))
-    for group in unassigned_groups:
-        #find schoolname and transportation based on periodeid
-        schoolname = ""
-        transportation = ""
-        # Create a new DataFrame row and concatenate correctly
-        new_row = pd.DataFrame([[group, schoolname, transportation]],
-                               columns=['Inschrijfcode', 'Schoolnaam', 'Vervoer'])
-        df_unassigned = pd.concat([df_unassigned, new_row], ignore_index=True)
-    return df_assigned, df_unassigned
+def format_output(solved_info: cp_model.CpSolver, garden: Garden):
+    # TODO: fill this function with Thomas' code! It returns the information per garden.
+    # df_excel = create_excel_output(output_data=x, unassigned_data=y)
+    # return df_excel
+    return pd.DataFrame()
 
 
 def get_summary_statistics(
@@ -194,7 +155,7 @@ def get_summary_statistics(
                     if solved_info.Value(assignment[(group, time, teacher)]) == 1:
                         assigned_groups.append(group)
                         schedule.at[teacher, time] = (
-                            f"{group} (size: {garden.group_sizes[group]}) (bus: {garden.group_uses_bus[group]})"
+                            f"{group}(size: {garden.group_sizes[group]}) (bus: {garden.group_uses_bus[group]})"
                         )
                         assigned_students += garden.group_sizes[group]
 
@@ -213,13 +174,16 @@ def get_summary_statistics(
             "teachers": garden.teachers,
         }
 
+    # If there was no feasible solution found, store information about that
     else:
-        # TODO: change this text to being in Dutch!
-        summary = ("The scheduling problem could not be solved for this garden with the current "
-                "input data and the current constraints. Please review the data and constraints and run again.")
+        summary = (
+            "The scheduling problem could not be solved for this garden with the current "
+            "input data and the current constraints. Please review the data and constraints and run again."
+        )
 
-    SHOW_LOGS = False
+    SHOW_LOGS = True
     if SHOW_LOGS:
+        # display(schedule)
         if len(unassigned_groups) > 0:
             print("WARNING UNASSIGNED GROUPS")
             for group in unassigned_groups:
