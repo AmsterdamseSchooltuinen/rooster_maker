@@ -62,6 +62,3 @@ def create_excel_output(stats_per_garden: dict):
     processed_data = output.getvalue()
 
     return processed_data
-
-
-
