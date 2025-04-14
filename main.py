@@ -315,4 +315,3 @@ if __name__ == "__main__":
         st.markdown("""
         Welkom bij de Schooltuinen Roostermaker!
         """)
-
