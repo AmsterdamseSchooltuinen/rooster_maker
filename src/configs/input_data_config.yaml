@@ -150,7 +150,7 @@ validations:
       group_id_col: period_id
 template_file_names:
   "educators_template": "Template educators.xlsx"
-  "school_template": "PLACEHOLDER Template schools.xlsx"
+  "school_template": "Template schools.xlsx"
   "garden_template": "Template school garden.xlsx"      
 Styles:
  css: |
