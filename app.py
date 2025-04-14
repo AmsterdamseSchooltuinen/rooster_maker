@@ -187,12 +187,12 @@ def main():
         st.success(finished_run_label)
 
         # Download button for Excel
-        st.download_button(
-            label="Download Resultaten",
-            data=st.session_state.final_output_df,
-            file_name="resultaten_schooltuinen_optimalisatie.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+        #st.download_button(
+           # label="Download Resultaten",
+           # data=st.session_state.final_output_df,
+           # file_name="resultaten_schooltuinen_optimalisatie.xlsx",
+          #  mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+       # )
         
         st.divider()
 
