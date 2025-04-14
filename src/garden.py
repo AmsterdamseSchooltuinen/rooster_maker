@@ -44,4 +44,3 @@ class Garden:
             included_constraints.update(front_end_constraints)
 
         self.constraints = included_constraints
-        
