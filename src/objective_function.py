@@ -45,3 +45,4 @@ def add_objective_function(garden: Garden, model: cp_model.CpModel, assignment: 
             number_of_preferred_allocations(garden, assignment)   
         ) * preferred_allocation_weight
     )
+
