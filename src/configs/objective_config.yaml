@@ -1,0 +1,6 @@
+# Config for preferred allocations
+preferred_allocation_weight: 0.005
+first_choice_score: 10
+second_choice_score: 5
+third_choice_score: 2
+
