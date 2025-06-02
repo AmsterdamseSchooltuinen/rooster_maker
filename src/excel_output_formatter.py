@@ -19,6 +19,61 @@ def create_excel_output(stats_per_garden: dict):
     table_cells.set_align('center')
 
 
+
+    # Initialize Meta preferred format sheet
+    sheet = workbook.add_worksheet("Indeling")
+    sheet.set_column(0, 0, 30)
+    sheet.set_column(1, 15, 21)
+    sheet.write("A1", "Voorgesteld schooltuinrooster per educatief medewerker", workbook_title)
+
+    # For each garden and teacher, add the schedule
+    row_n = 4
+    for g in stats_per_garden.keys():
+        stats = stats_per_garden[g]
+        # Set up divider between gardens
+        sheet.set_row(row_n, cell_format=black_fill)
+        row_n += 3
+        cell = "A" + str(row_n)
+        # Write the name of the garden
+        sheet.write(cell, g, sub_title)
+        row_n += 1
+        for teacher in stats['teachers']:
+            row_n += 1
+            cell = "A" + str(row_n)
+            sheet.write(cell, teacher, c_sub_title)
+            row_n += 1
+
+            schedule = stats['schedule']
+
+            schedule = schedule.loc[teacher]
+
+            weekdagen = ["maandag", "dinsdag", "woensdag", "donderdag", "vrijdag"]
+
+            for i, dag in enumerate(weekdagen):
+                sheet.write(row_n - 1, i + 1, dag, c_sub_title)
+
+            values = ["09:00-10:30", "10:45-12:15", "13:30-15:00"]
+            row_n +=1
+
+            for val in values:
+            
+                cell = "A" + str(row_n)
+                sheet.write(cell, val, c_sub_title)
+
+                for col, dag in enumerate(weekdagen):
+                    key = f"{dag}, {val}"
+
+                    if key in schedule.index:
+                        value = schedule[key]
+                        if pd.notna(value) and isinstance(value, str) and value.strip():
+                            sheet.write(row_n - 1, col + 1, value.split()[0], c_sub_title)
+                        else:
+                            sheet.write(row_n - 1, col + 1, "", c_sub_title)
+
+
+                             
+                row_n += 1
+
     # Initialize worksheets
     worksheet = workbook.add_worksheet("Rooster")
     worksheet.set_column(0, 0, 30)
