@@ -41,7 +41,7 @@ def add_objective_function(garden: Garden, model: cp_model.CpModel, assignment: 
     preferred_allocation_weight = garden.objective["preferred_allocation_weight"]
     model.Maximize(
         sum(number_of_allocations(garden, assignment)) * 5
-        + sum(
-            number_of_preferred_allocations(garden, assignment)   
-        ) 
+        #+ sum(
+            #number_of_preferred_allocations(garden, assignment)   
+        #) 
     )
